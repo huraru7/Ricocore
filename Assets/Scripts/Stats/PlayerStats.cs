@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerStats : MonoBehaviour
+public class PlayerStats : MonoBehaviour, IDamageable
 {
     [SerializeField] private TankStats baseStats;
 
@@ -29,6 +29,7 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
+        if (amount <= 0) return;
         CurrentHp = Mathf.Max(0, CurrentHp - amount);
         if (CurrentHp <= 0) gameObject.SetActive(false);
     }

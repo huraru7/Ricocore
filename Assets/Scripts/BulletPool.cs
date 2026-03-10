@@ -39,6 +39,7 @@ public class BulletPool : MonoBehaviour
     public Bullet Get(Vector2 position, Quaternion rotation)
     {
         Bullet b = pool.Get();
+        b.UpdateOwner(playerCollider);  // 生成タイミングのずれを防ぐため毎回更新
         b.transform.SetPositionAndRotation(position, rotation);
         b.Launch(playerStats.BulletSpeed, playerStats.MaxBounces, playerStats.BulletLifetime);
         return b;

@@ -5,31 +5,48 @@ using UnityEngine.Pool;
 public class Bullet : MonoBehaviour
 {
     private Rigidbody2D rb;
+    private Collider2D  col;
     private IObjectPool<Bullet> pool;
     private int bounceCount;
     private float timer;
     private Vector2 prevVelocity;
 
-    // 発射時に PlayerStats から受け取る
+    // 発射時に設定されるパラメータ
     private float speed;
     private int   maxBounces;
     private float lifetime;
 
+    // 発射者のCollider（発射直後のみ自己衝突を無視する）
+    private Collider2D ownerCol;
+    private float      ownerIgnoreTimer;
+    private const float OwnerIgnoreDuration = 0.1f;
+
     void Awake()
     {
-        rb = GetComponent<Rigidbody2D>();
+        rb  = GetComponent<Rigidbody2D>();
+        col = GetComponent<Collider2D>();
     }
 
-    public void Init(IObjectPool<Bullet> objectPool, Collider2D playerCol)
+    public void Init(IObjectPool<Bullet> objectPool, Collider2D ownerCollider)
     {
-        pool = objectPool;
-        if (playerCol != null)
-            Physics2D.IgnoreCollision(GetComponent<Collider2D>(), playerCol);
+        pool     = objectPool;
+        ownerCol = ownerCollider;
+    }
+
+    // Get() 時に ownerCollider を最新状態に更新する（プール生成とSetOwner呼び出しの順序ずれを防ぐ）
+    public void UpdateOwner(Collider2D ownerCollider)
+    {
+        ownerCol = ownerCollider;
     }
 
     void OnDisable()
     {
         rb.linearVelocity = Vector2.zero;
+
+        // プール返却時に IgnoreCollision を必ずリセット
+        if (ownerCol != null)
+            Physics2D.IgnoreCollision(col, ownerCol, false);
+        ownerIgnoreTimer = 0f;
     }
 
     // BulletPool が position/rotation を設定した後に呼ぶ
@@ -43,6 +60,13 @@ public class Bullet : MonoBehaviour
         timer        = lifetime;
         prevVelocity = transform.up * speed;
         rb.linearVelocity = prevVelocity;
+
+        // 発射直後のみ発射者との衝突を無視する
+        if (ownerCol != null)
+        {
+            Physics2D.IgnoreCollision(col, ownerCol, true);
+            ownerIgnoreTimer = OwnerIgnoreDuration;
+        }
     }
 
     // 物理演算が走る前に速度を保存する
@@ -53,19 +77,45 @@ public class Bullet : MonoBehaviour
 
     void Update()
     {
+        // 発射者への無視タイマーを更新
+        if (ownerIgnoreTimer > 0f)
+        {
+            ownerIgnoreTimer -= Time.deltaTime;
+            if (ownerIgnoreTimer <= 0f && ownerCol != null)
+                Physics2D.IgnoreCollision(col, ownerCol, false);  // 解除 → 跳弾後に発射者にも当たれる
+        }
+
         timer -= Time.deltaTime;
-        if (timer <= 0f) pool.Release(this);
+        if (timer <= 0f)
+        {
+            if (pool == null) { Debug.LogError("[Bullet] pool が未設定です。Init() が呼ばれていません。", this); return; }
+            pool.Release(this);
+        }
     }
 
-    void OnCollisionEnter2D(Collision2D col)
+    void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!col.collider.TryGetComponent<IBounceable>(out _)) return;
+        // 壁などの跳弾対象
+        if (collision.collider.TryGetComponent<IBounceable>(out _))
+        {
+            bounceCount++;
+            if (bounceCount > maxBounces)
+            {
+                if (pool != null) pool.Release(this);
+                return;
+            }
 
-        bounceCount++;
-        if (bounceCount > maxBounces) { pool.Release(this); return; }
+            Vector2 reflected = Vector2.Reflect(prevVelocity.normalized, collision.contacts[0].normal);
+            rb.linearVelocity = reflected * speed;
+            transform.up = reflected;
+            return;
+        }
 
-        Vector2 reflected = Vector2.Reflect(prevVelocity.normalized, col.contacts[0].normal);
-        rb.linearVelocity = reflected * speed;
-        transform.up = reflected;
+        // ダメージ対象
+        if (collision.collider.TryGetComponent<IDamageable>(out var target))
+        {
+            target.TakeDamage(1);
+            if (pool != null) pool.Release(this);
+        }
     }
 }
