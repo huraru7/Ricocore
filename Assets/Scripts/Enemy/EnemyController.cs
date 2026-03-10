@@ -7,7 +7,7 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private float maxTurretAngle = 90f;
     [SerializeField] private Transform turret;
     [SerializeField] private Transform firePoint;
-    [SerializeField] private EnemyBulletPool bulletPool;
+    [SerializeField] private BulletPool bulletPool;
 
     // IEnemyAI を実装した MonoBehaviour をアタッチして差し替える
     [SerializeField] private MonoBehaviour aiComponent;
@@ -82,7 +82,7 @@ public class EnemyController : MonoBehaviour
     public void TryFire()
     {
         if (Time.time < nextFireTime) return;
-        bulletPool.Get(firePoint.position, firePoint.rotation);
+        bulletPool.Get(firePoint.position, firePoint.rotation, enemyStats.BulletSpeed, enemyStats.MaxBounces, enemyStats.BulletLifetime);
         nextFireTime = Time.time + enemyStats.FireCooldown;
     }
 

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDamageable
 {
     [SerializeField] private PlayerStats playerStats;
     [SerializeField] private float maxTurretAngle = 150f;
@@ -24,7 +24,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        bulletPool.SetPlayerCollider(col);
+        bulletPool.SetOwnerCollider(col);
     }
 
     void Update()
@@ -70,6 +70,11 @@ public class PlayerController : MonoBehaviour
 
     void Fire()
     {
-        bulletPool.Get(firePoint.position, firePoint.rotation);
+        bulletPool.Get(firePoint.position, firePoint.rotation, playerStats.BulletSpeed, playerStats.MaxBounces, playerStats.BulletLifetime);
+    }
+
+    public void TakeDamage(int amount)
+    {
+        playerStats.TakeDamage(amount);
     }
 }

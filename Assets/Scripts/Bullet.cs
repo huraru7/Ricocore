@@ -16,10 +16,8 @@ public class Bullet : MonoBehaviour
     private int   maxBounces;
     private float lifetime;
 
-    // 発射者のCollider（発射直後のみ自己衝突を無視する）
+    // 発射者のCollider（バウンスするまで自己衝突を無視する）
     private Collider2D ownerCol;
-    private float      ownerIgnoreTimer;
-    private const float OwnerIgnoreDuration = 0.1f;
 
     void Awake()
     {
@@ -46,7 +44,6 @@ public class Bullet : MonoBehaviour
         // プール返却時に IgnoreCollision を必ずリセット
         if (ownerCol != null)
             Physics2D.IgnoreCollision(col, ownerCol, false);
-        ownerIgnoreTimer = 0f;
     }
 
     // BulletPool が position/rotation を設定した後に呼ぶ
@@ -61,12 +58,9 @@ public class Bullet : MonoBehaviour
         prevVelocity = transform.up * speed;
         rb.linearVelocity = prevVelocity;
 
-        // 発射直後のみ発射者との衝突を無視する
+        // バウンスするまで発射者との衝突を無視する（発射直後の自己命中を防ぐ）
         if (ownerCol != null)
-        {
             Physics2D.IgnoreCollision(col, ownerCol, true);
-            ownerIgnoreTimer = OwnerIgnoreDuration;
-        }
     }
 
     // 物理演算が走る前に速度を保存する
@@ -77,14 +71,6 @@ public class Bullet : MonoBehaviour
 
     void Update()
     {
-        // 発射者への無視タイマーを更新
-        if (ownerIgnoreTimer > 0f)
-        {
-            ownerIgnoreTimer -= Time.deltaTime;
-            if (ownerIgnoreTimer <= 0f && ownerCol != null)
-                Physics2D.IgnoreCollision(col, ownerCol, false);  // 解除 → 跳弾後に発射者にも当たれる
-        }
-
         timer -= Time.deltaTime;
         if (timer <= 0f)
         {
@@ -101,9 +87,13 @@ public class Bullet : MonoBehaviour
             bounceCount++;
             if (bounceCount > maxBounces)
             {
-                if (pool != null) pool.Release(this);
+                pool?.Release(this);
                 return;
             }
+
+            // 初回バウンス後、発射者への衝突を有効化（自滅を許容）
+            if (bounceCount == 1 && ownerCol != null)
+                Physics2D.IgnoreCollision(col, ownerCol, false);
 
             Vector2 reflected = Vector2.Reflect(prevVelocity.normalized, collision.contacts[0].normal);
             rb.linearVelocity = reflected * speed;
@@ -111,11 +101,12 @@ public class Bullet : MonoBehaviour
             return;
         }
 
-        // ダメージ対象
-        if (collision.collider.TryGetComponent<IDamageable>(out var target))
+        // ダメージ対象（親階層も検索して IDamageable を取得）
+        IDamageable target = collision.collider.GetComponentInParent<IDamageable>();
+        if (target != null)
         {
             target.TakeDamage(1);
-            if (pool != null) pool.Release(this);
+            pool?.Release(this);
         }
     }
 }
