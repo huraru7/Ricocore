@@ -33,6 +33,12 @@ public class Bullet : MonoBehaviour
         ownerCol = ownerCollider;
     }
 
+    // Get() 時に ownerCollider を最新状態に更新する（プール生成とSetOwner呼び出しの順序ずれを防ぐ）
+    public void UpdateOwner(Collider2D ownerCollider)
+    {
+        ownerCol = ownerCollider;
+    }
+
     void OnDisable()
     {
         rb.linearVelocity = Vector2.zero;
@@ -80,7 +86,11 @@ public class Bullet : MonoBehaviour
         }
 
         timer -= Time.deltaTime;
-        if (timer <= 0f) pool.Release(this);
+        if (timer <= 0f)
+        {
+            if (pool == null) { Debug.LogError("[Bullet] pool が未設定です。Init() が呼ばれていません。", this); return; }
+            pool.Release(this);
+        }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -89,7 +99,11 @@ public class Bullet : MonoBehaviour
         if (collision.collider.TryGetComponent<IBounceable>(out _))
         {
             bounceCount++;
-            if (bounceCount > maxBounces) { pool.Release(this); return; }
+            if (bounceCount > maxBounces)
+            {
+                if (pool != null) pool.Release(this);
+                return;
+            }
 
             Vector2 reflected = Vector2.Reflect(prevVelocity.normalized, collision.contacts[0].normal);
             rb.linearVelocity = reflected * speed;
@@ -101,7 +115,7 @@ public class Bullet : MonoBehaviour
         if (collision.collider.TryGetComponent<IDamageable>(out var target))
         {
             target.TakeDamage(1);
-            pool.Release(this);
+            if (pool != null) pool.Release(this);
         }
     }
 }

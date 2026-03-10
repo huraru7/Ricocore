@@ -42,6 +42,7 @@ public class EnemyBulletPool : MonoBehaviour
     public Bullet Get(Vector2 position, Quaternion rotation)
     {
         Bullet b = pool.Get();
+        b.UpdateOwner(ownerCollider);  // 生成タイミングのずれを防ぐため毎回更新
         b.transform.SetPositionAndRotation(position, rotation);
         b.Launch(enemyStats.BulletSpeed, enemyStats.MaxBounces, enemyStats.BulletLifetime);
         return b;

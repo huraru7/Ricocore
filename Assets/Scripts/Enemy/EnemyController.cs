@@ -33,11 +33,12 @@ public class EnemyController : MonoBehaviour
 
     void Start()
     {
-        // Tagを使わず PlayerStats からプレイヤーを取得
-        if (TryGetComponent(out PlayerStats player))
-        {
+        // Tagを使わずシーン内の PlayerStats からプレイヤーを取得
+        PlayerStats player = FindFirstObjectByType<PlayerStats>();
+        if (player != null)
             PlayerTransform = player.transform;
-        }
+        else
+            Debug.LogWarning("[EnemyController] シーン内に PlayerStats が見つかりません。", this);
 
         bulletPool.SetOwnerCollider(GetComponent<Collider2D>());
         currentAI?.Initialize(this);

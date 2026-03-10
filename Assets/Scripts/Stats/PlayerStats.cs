@@ -29,6 +29,7 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     public void TakeDamage(int amount)
     {
+        if (amount <= 0) return;
         CurrentHp = Mathf.Max(0, CurrentHp - amount);
         if (CurrentHp <= 0) gameObject.SetActive(false);
     }
