@@ -15,6 +15,7 @@ public class EnemyStats : MonoBehaviour, IDamageable
 
     void Awake()
     {
+        Debug.Assert(data != null, $"[EnemyStats] EnemyData が未設定です: {gameObject.name}");
         CurrentHp = data.maxHp;
     }
 
@@ -35,14 +36,21 @@ public class EnemyStats : MonoBehaviour, IDamageable
         if (data.dropTable == null || data.dropTable.Length == 0) return;
         if (Random.value > data.dropChance) return;
 
-        // ウェイト抽選
+        // ウェイト抽選（weight <= 0 や Prefab 未設定のエントリは除外）
         float totalWeight = 0f;
-        foreach (var entry in data.dropTable) totalWeight += entry.weight;
+        foreach (var entry in data.dropTable)
+        {
+            if (entry.modulePrefab != null && entry.weight > 0f)
+                totalWeight += entry.weight;
+        }
+
+        if (totalWeight <= 0f) return;
 
         float roll       = Random.Range(0f, totalWeight);
         float cumulative = 0f;
         foreach (var entry in data.dropTable)
         {
+            if (entry.modulePrefab == null || entry.weight <= 0f) continue;
             cumulative += entry.weight;
             if (roll <= cumulative)
             {

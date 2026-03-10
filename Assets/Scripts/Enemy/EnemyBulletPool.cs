@@ -13,6 +13,9 @@ public class EnemyBulletPool : MonoBehaviour
 
     void Awake()
     {
+        Debug.Assert(bulletPrefab != null, $"[EnemyBulletPool] bulletPrefab が未設定です: {gameObject.name}");
+        Debug.Assert(enemyStats   != null, $"[EnemyBulletPool] enemyStats が未設定です: {gameObject.name}");
+
         pool = new ObjectPool<Bullet>(
             createFunc:      CreateBullet,
             actionOnGet:     b => b.gameObject.SetActive(true),

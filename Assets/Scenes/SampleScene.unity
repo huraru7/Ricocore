@@ -1025,7 +1025,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
   enemyStats: {fileID: 1927155251}
-  maxTurretAngle: 150
+  maxTurretAngle: 90
   turret: {fileID: 204442808}
   firePoint: {fileID: 405759862}
   bulletPool: {fileID: 1927155249}

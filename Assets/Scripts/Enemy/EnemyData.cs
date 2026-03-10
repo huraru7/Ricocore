@@ -8,17 +8,16 @@ public class EnemyData : ScriptableObject
     public float turnSpeed = 90f;
 
     [Header("射撃")]
-    public float fireCooldown   = 1.5f;
-    public float bulletSpeed    = 10f;
-    public int   maxBounces     = 1;
+    public float fireCooldown = 1.5f;
+    public float bulletSpeed = 10f;
+    public int maxBounces = 1;
     public float bulletLifetime = 5f;
 
     [Header("耐久")]
     public int maxHp = 2;
 
     [Header("ドロップ")]
-    [Range(0f, 1f)]
-    public float dropChance = 0.5f;
+    [Range(0f, 1f)] public float dropChance = 0.5f;
     public ModuleDropEntry[] dropTable;
 }
 
@@ -26,5 +25,5 @@ public class EnemyData : ScriptableObject
 public class ModuleDropEntry
 {
     public GameObject modulePrefab;
-    public float      weight = 1f;
+    public float weight = 1f;
 }

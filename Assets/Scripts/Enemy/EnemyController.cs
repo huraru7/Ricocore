@@ -3,10 +3,10 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D), typeof(EnemyStats))]
 public class EnemyController : MonoBehaviour
 {
-    [SerializeField] private EnemyStats      enemyStats;
-    [SerializeField] private float           maxTurretAngle = 150f;
-    [SerializeField] private Transform       turret;
-    [SerializeField] private Transform       firePoint;
+    [SerializeField] private EnemyStats enemyStats;
+    [SerializeField] private float maxTurretAngle = 90f;
+    [SerializeField] private Transform turret;
+    [SerializeField] private Transform firePoint;
     [SerializeField] private EnemyBulletPool bulletPool;
 
     // IEnemyAI を実装した MonoBehaviour をアタッチして差し替える
@@ -21,14 +21,23 @@ public class EnemyController : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        Debug.Assert(turret     != null, $"[EnemyController] turret が未設定です: {gameObject.name}");
+        Debug.Assert(firePoint  != null, $"[EnemyController] firePoint が未設定です: {gameObject.name}");
+        Debug.Assert(bulletPool != null, $"[EnemyController] bulletPool が未設定です: {gameObject.name}");
+
         currentAI = aiComponent as IEnemyAI;
+        if (aiComponent != null && currentAI == null)
+            Debug.LogError($"[EnemyController] aiComponent が IEnemyAI を実装していません: {aiComponent.GetType().Name}", this);
     }
 
     void Start()
     {
         // Tagを使わず PlayerStats からプレイヤーを取得
-        PlayerStats player = FindObjectOfType<PlayerStats>();
-        if (player != null) PlayerTransform = player.transform;
+        if (TryGetComponent(out PlayerStats player))
+        {
+            PlayerTransform = player.transform;
+        }
 
         bulletPool.SetOwnerCollider(GetComponent<Collider2D>());
         currentAI?.Initialize(this);
@@ -36,7 +45,11 @@ public class EnemyController : MonoBehaviour
 
     void Update()
     {
-        if (PlayerTransform == null) return;
+        if (PlayerTransform == null)
+        {
+            StopMovement();
+            return;
+        }
         AimTurretAt(PlayerTransform.position);
         currentAI?.UpdateAI(this);
     }
@@ -47,7 +60,7 @@ public class EnemyController : MonoBehaviour
     {
         Vector2 dir = (targetPos - (Vector2)transform.position).normalized;
         float targetAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
-        float angleDiff   = Mathf.DeltaAngle(rb.rotation, targetAngle);
+        float angleDiff = Mathf.DeltaAngle(rb.rotation, targetAngle);
 
         float turnDir = Mathf.Sign(angleDiff);
         rb.angularVelocity = -turnDir * enemyStats.TurnSpeed;
@@ -61,7 +74,7 @@ public class EnemyController : MonoBehaviour
 
     public void StopMovement()
     {
-        rb.linearVelocity  = Vector2.zero;
+        rb.linearVelocity = Vector2.zero;
         rb.angularVelocity = 0f;
     }
 
@@ -81,8 +94,8 @@ public class EnemyController : MonoBehaviour
         float desiredAngle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg - 90f;
 
         float bodyAngle = rb.rotation;
-        float relative  = Mathf.DeltaAngle(bodyAngle, desiredAngle);
-        float clamped   = Mathf.Clamp(relative, -maxTurretAngle, maxTurretAngle);
+        float relative = Mathf.DeltaAngle(bodyAngle, desiredAngle);
+        float clamped = Mathf.Clamp(relative, -maxTurretAngle, maxTurretAngle);
 
         turret.rotation = Quaternion.Euler(0f, 0f, bodyAngle + clamped);
     }
