@@ -4,7 +4,7 @@ using UnityEngine;
 public class AmmoUI : MonoBehaviour
 {
     [SerializeField] private PlayerStats playerStats;
-    [SerializeField] private TMP_Text ammoText;
+    [SerializeField] private TextMeshProUGUI ammoText;
 
     void Update()
     {
