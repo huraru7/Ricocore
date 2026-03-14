@@ -13,6 +13,10 @@ public class TankStats : ScriptableObject
     public int   maxBounces     = 3;
     public float bulletLifetime = 5f;
 
+    [Header("弾薬")]
+    public int   maxAmmo          = 5;
+    public float ammoRechargeTime = 3f; // 1発補充するのにかかる秒数
+
     [Header("耐久")]
     public int maxHp = 3;
 }

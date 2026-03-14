@@ -70,6 +70,7 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     void Fire()
     {
+        if (!playerStats.UseAmmo()) return;
         bulletPool.Get(firePoint.position, firePoint.rotation, playerStats.BulletSpeed, playerStats.MaxBounces, playerStats.BulletLifetime);
     }
 
