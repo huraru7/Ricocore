@@ -1,112 +1,100 @@
 using UnityEngine;
 using UnityEngine.Pool;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class Bullet : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    private Collider2D  col;
+    [SerializeField, Range(0.01f, 1.0f)] private float castRadius = 0.15f;
+    [SerializeField] private int ignoreOwnerFrames = 3;
+
     private IObjectPool<Bullet> pool;
-    private int bounceCount;
-    private float timer;
-    private Vector2 prevVelocity;
-
-    // 発射時に設定されるパラメータ
+    private Vector2 moveDirection;
     private float speed;
-    private int   maxBounces;
     private float lifetime;
+    private float timer;
 
-    // 発射者のCollider（バウンスするまで自己衝突を無視する）
+    // 発射者のCollider（無視期間中にスキップ）
     private Collider2D ownerCol;
+    private int ignoreOwnerFramesRemaining;
 
-    void Awake()
-    {
-        rb  = GetComponent<Rigidbody2D>();
-        col = GetComponent<Collider2D>();
-        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-    }
+    // CircleCast 用バッファとフィルタ（GC Alloc 防止）
+    private static readonly RaycastHit2D[] hitBuffer = new RaycastHit2D[10];
+    private static readonly ContactFilter2D castFilter = new() { useTriggers = true };
 
     public void Init(IObjectPool<Bullet> objectPool)
     {
         pool = objectPool;
     }
 
-    // Get() 時に ownerCollider を最新状態に更新する（プール生成とSetOwner呼び出しの順序ずれを防ぐ）
     public void UpdateOwner(Collider2D ownerCollider)
     {
         ownerCol = ownerCollider;
     }
 
-    void OnDisable()
-    {
-        rb.linearVelocity = Vector2.zero;
-
-        // プール返却時に IgnoreCollision を必ずリセット
-        if (ownerCol != null)
-            Physics2D.IgnoreCollision(col, ownerCol, false);
-    }
-
     // BulletPool が position/rotation を設定した後に呼ぶ
-    public void Launch(float bulletSpeed, int maxBounceCount, float bulletLifetime)
+    public void Launch(float bulletSpeed, float bulletLifetime)
     {
-        speed      = bulletSpeed;
-        maxBounces = maxBounceCount;
-        lifetime   = bulletLifetime;
-
-        bounceCount  = 0;
-        timer        = lifetime;
-        prevVelocity = transform.up * speed;
-        rb.linearVelocity = prevVelocity;
-
-        // バウンスするまで発射者との衝突を無視する（発射直後の自己命中を防ぐ）
-        if (ownerCol != null)
-            Physics2D.IgnoreCollision(col, ownerCol, true);
-    }
-
-    // 物理演算が走る前に速度を保存する
-    void FixedUpdate()
-    {
-        prevVelocity = rb.linearVelocity;
+        speed     = bulletSpeed;
+        lifetime  = bulletLifetime;
+        timer     = 0f;
+        moveDirection = transform.up;
+        ignoreOwnerFramesRemaining = ignoreOwnerFrames;
     }
 
     void Update()
     {
-        timer -= Time.deltaTime;
-        if (timer <= 0f)
+        // owner無視フレームを毎フレーム減算
+        if (ignoreOwnerFramesRemaining > 0)
+            ignoreOwnerFramesRemaining--;
+
+        timer += Time.deltaTime;
+        if (timer >= lifetime)
         {
             if (pool == null) { Debug.LogError("[Bullet] pool が未設定です。Init() が呼ばれていません。", this); return; }
             pool.Release(this);
-        }
-    }
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        // 壁などの跳弾対象
-        if (collision.collider.TryGetComponent<IBounceable>(out _))
-        {
-            bounceCount++;
-            if (bounceCount > maxBounces)
-            {
-                pool?.Release(this);
-                return;
-            }
-
-            // 初回バウンス後、発射者への衝突を有効化（自滅を許容）
-            if (bounceCount == 1 && ownerCol != null)
-                Physics2D.IgnoreCollision(col, ownerCol, false);
-
-            Vector2 reflected = Vector2.Reflect(prevVelocity.normalized, collision.contacts[0].normal);
-            rb.linearVelocity = reflected * speed;
-            transform.up = reflected;
             return;
         }
 
-        // ダメージ対象（親階層も検索して IDamageable を取得）
-        IDamageable target = collision.collider.GetComponentInParent<IDamageable>();
-        if (target != null)
+        float step = speed * Time.deltaTime;
+
+        // 全ヒットを取得（GC Alloc なし）
+        int hitCount = Physics2D.CircleCast(
+            transform.position, castRadius, moveDirection, castFilter, hitBuffer, step);
+
+        // owner無視期間中はownerColをスキップして最初の有効ヒットを探す
+        RaycastHit2D hit = default;
+        for (int i = 0; i < hitCount; i++)
         {
-            target.TakeDamage(1);
+            if (ignoreOwnerFramesRemaining > 0 && hitBuffer[i].collider == ownerCol)
+                continue;
+            hit = hitBuffer[i];
+            break;
+        }
+
+        if (!hit)
+        {
+            // 衝突なし: 等速直線移動
+            transform.position += (Vector3)(moveDirection * step);
+        }
+        else if (hit.collider.GetComponentInParent<IBounceable>() != null)
+        {
+            // 壁: 反射。反射後は即座にowner衝突を有効化
+            moveDirection = Vector2.Reflect(moveDirection, hit.normal);
+            transform.up = moveDirection;
+            transform.position = hit.centroid + hit.normal * 0.01f;
+            ignoreOwnerFramesRemaining = 0;
+        }
+        else
+        {
+            // 敵・プレイヤー: ダメージ & 消滅
+            hit.collider.GetComponentInParent<IDamageable>()?.TakeDamage(1);
             pool?.Release(this);
         }
+    }
+
+    // Scene ビューで castRadius を可視化（調節の目安に）
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, castRadius);
     }
 }

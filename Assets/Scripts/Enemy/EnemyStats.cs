@@ -10,7 +10,6 @@ public class EnemyStats : MonoBehaviour, IDamageable
     public float TurnSpeed      => data.turnSpeed;
     public float FireCooldown   => data.fireCooldown;
     public float BulletSpeed    => data.bulletSpeed;
-    public int   MaxBounces     => data.maxBounces;
     public float BulletLifetime => data.bulletLifetime;
 
     void Awake()

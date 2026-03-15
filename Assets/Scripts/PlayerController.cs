@@ -5,7 +5,6 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour, IDamageable
 {
     [SerializeField] private PlayerStats playerStats;
-    [SerializeField] private float maxTurretAngle = 150f;
     [SerializeField] private Transform turret;
     [SerializeField] private Transform firePoint;
     [SerializeField] private BulletPool bulletPool;
@@ -54,17 +53,16 @@ public class PlayerController : MonoBehaviour, IDamageable
         rb.angularVelocity = -turn * playerStats.TurnSpeed;
     }
 
-    // マウス方向に砲塔を向ける。車体後方への照準はクランプで防ぐ
     void AimTurret()
     {
         Vector2 mouseWorld = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        TurretHelper.AimAt(turret, mouseWorld, rb.rotation, maxTurretAngle);
+        TurretHelper.AimAt(turret, mouseWorld);
     }
 
     void Fire()
     {
         if (!playerStats.UseAmmo()) return;
-        bulletPool.Get(firePoint.position, firePoint.rotation, playerStats.BulletSpeed, playerStats.MaxBounces, playerStats.BulletLifetime);
+        bulletPool.Get(firePoint.position, firePoint.rotation, playerStats.BulletSpeed, playerStats.BulletLifetime);
     }
 
     public void TakeDamage(int amount)

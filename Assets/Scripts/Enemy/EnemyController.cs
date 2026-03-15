@@ -4,7 +4,6 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     [SerializeField] private EnemyStats enemyStats;
-    [SerializeField] private float maxTurretAngle = 90f;
     [SerializeField] private Transform turret;
     [SerializeField] private Transform firePoint;
     [SerializeField] private BulletPool bulletPool;
@@ -81,7 +80,7 @@ public class EnemyController : MonoBehaviour
     public void TryFire()
     {
         if (Time.time < nextFireTime) return;
-        bulletPool.Get(firePoint.position, firePoint.rotation, enemyStats.BulletSpeed, enemyStats.MaxBounces, enemyStats.BulletLifetime);
+        bulletPool.Get(firePoint.position, firePoint.rotation, enemyStats.BulletSpeed, enemyStats.BulletLifetime);
         nextFireTime = Time.time + enemyStats.FireCooldown;
     }
 
@@ -89,6 +88,6 @@ public class EnemyController : MonoBehaviour
 
     private void AimTurretAt(Vector2 targetPos)
     {
-        TurretHelper.AimAt(turret, targetPos, rb.rotation, maxTurretAngle);
+        TurretHelper.AimAt(turret, targetPos);
     }
 }

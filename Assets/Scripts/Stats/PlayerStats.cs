@@ -10,7 +10,6 @@ public class PlayerStats : MonoBehaviour, IDamageable
     public float TurnSpeed    => baseStats.turnSpeed    + moduleBonus.turnSpeed    + skillBonus.turnSpeed;
     public float FireCooldown => baseStats.fireCooldown + moduleBonus.fireCooldown + skillBonus.fireCooldown;
     public float BulletSpeed  => baseStats.bulletSpeed  + moduleBonus.bulletSpeed  + skillBonus.bulletSpeed;
-    public int   MaxBounces   => baseStats.maxBounces   + moduleBonus.maxBounces   + skillBonus.maxBounces;
     public float BulletLifetime => baseStats.bulletLifetime;
     public int   MaxAmmo        => baseStats.maxAmmo    + moduleBonus.maxAmmo      + skillBonus.maxAmmo;
     public float AmmoRechargeTime => baseStats.ammoRechargeTime;

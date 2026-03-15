@@ -5,7 +5,6 @@ public struct StatBonus
     public float turnSpeed;
     public float fireCooldown;
     public float bulletSpeed;
-    public int   maxBounces;
     public int   hp;
     public int   maxAmmo;
 

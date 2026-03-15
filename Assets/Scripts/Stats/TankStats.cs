@@ -8,9 +8,8 @@ public class TankStats : ScriptableObject
     public float turnSpeed    = 120f;
 
     [Header("射撃")]
-    public float fireCooldown   = 0.15f;
+    public float fireCooldown   = 1.0f;
     public float bulletSpeed    = 12f;
-    public int   maxBounces     = 3;
     public float bulletLifetime = 5f;
 
     [Header("弾薬")]

@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TankStats
   moveSpeed: 6
   turnSpeed: 120
-  fireCooldown: 0.15
+  fireCooldown: 1
   bulletSpeed: 12
-  maxBounces: 3
   bulletLifetime: 5
+  maxAmmo: 5
+  ammoRechargeTime: 3
   maxHp: 3

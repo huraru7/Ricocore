@@ -10,7 +10,6 @@ public class EnemyData : ScriptableObject
     [Header("射撃")]
     public float fireCooldown = 1.5f;
     public float bulletSpeed = 10f;
-    public int maxBounces = 1;
     public float bulletLifetime = 5f;
 
     [Header("耐久")]
