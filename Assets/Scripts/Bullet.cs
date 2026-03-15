@@ -23,12 +23,12 @@ public class Bullet : MonoBehaviour
     {
         rb  = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
     }
 
-    public void Init(IObjectPool<Bullet> objectPool, Collider2D ownerCollider)
+    public void Init(IObjectPool<Bullet> objectPool)
     {
-        pool     = objectPool;
-        ownerCol = ownerCollider;
+        pool = objectPool;
     }
 
     // Get() 時に ownerCollider を最新状態に更新する（プール生成とSetOwner呼び出しの順序ずれを防ぐ）

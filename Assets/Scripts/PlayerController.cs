@@ -47,25 +47,18 @@ public class PlayerController : MonoBehaviour, IDamageable
     void Move()
     {
         var kb = Keyboard.current;
-        float fwd  = (kb.wKey.isPressed ? 1f : 0f) - (kb.sKey.isPressed ? 1f : 0f);
+        float fwd = (kb.wKey.isPressed ? 1f : 0f) - (kb.sKey.isPressed ? 1f : 0f);
         float turn = (kb.dKey.isPressed ? 1f : 0f) - (kb.aKey.isPressed ? 1f : 0f);
 
-        rb.linearVelocity  = transform.up * (fwd * playerStats.MoveSpeed);
+        rb.linearVelocity = transform.up * (fwd * playerStats.MoveSpeed);
         rb.angularVelocity = -turn * playerStats.TurnSpeed;
     }
 
-    // マウス方向に砲塔を向ける。ただし車体後方への照準はクランプで防ぐ
+    // マウス方向に砲塔を向ける。車体後方への照準はクランプで防ぐ
     void AimTurret()
     {
         Vector2 mouseWorld = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        Vector2 aimDir = (mouseWorld - (Vector2)turret.position).normalized;
-        float desiredAngle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg - 90f;
-
-        float bodyAngle = rb.rotation;
-        float relative  = Mathf.DeltaAngle(bodyAngle, desiredAngle);
-        float clamped   = Mathf.Clamp(relative, -maxTurretAngle, maxTurretAngle);
-
-        turret.rotation = Quaternion.Euler(0f, 0f, bodyAngle + clamped);
+        TurretHelper.AimAt(turret, mouseWorld, rb.rotation, maxTurretAngle);
     }
 
     void Fire()

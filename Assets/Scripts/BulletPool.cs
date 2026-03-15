@@ -33,7 +33,7 @@ public class BulletPool : MonoBehaviour
     private Bullet CreateBullet()
     {
         Bullet b = Instantiate(bulletPrefab);
-        b.Init(pool, ownerCollider);
+        b.Init(pool);
         return b;
     }
 

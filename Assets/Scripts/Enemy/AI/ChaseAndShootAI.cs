@@ -5,8 +5,6 @@ public class ChaseAndShootAI : MonoBehaviour, IEnemyAI
     [SerializeField] private float shootRange = 8f;  // この距離以内で射撃
     [SerializeField] private float stopRange  = 3f;  // この距離以内で停止（近すぎる場合）
 
-    public void Initialize(EnemyController controller) { }
-
     public void UpdateAI(EnemyController controller)
     {
         Transform player = controller.PlayerTransform;

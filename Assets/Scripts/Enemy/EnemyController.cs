@@ -41,7 +41,6 @@ public class EnemyController : MonoBehaviour
             Debug.LogWarning("[EnemyController] シーン内に PlayerStats が見つかりません。", this);
 
         bulletPool.SetOwnerCollider(GetComponent<Collider2D>());
-        currentAI?.Initialize(this);
     }
 
     void Update()
@@ -88,16 +87,8 @@ public class EnemyController : MonoBehaviour
 
     // --- 内部処理 ---
 
-    // PlayerControllerの AimTurret() と同じアルゴリズム
     private void AimTurretAt(Vector2 targetPos)
     {
-        Vector2 aimDir = (targetPos - (Vector2)turret.position).normalized;
-        float desiredAngle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg - 90f;
-
-        float bodyAngle = rb.rotation;
-        float relative = Mathf.DeltaAngle(bodyAngle, desiredAngle);
-        float clamped = Mathf.Clamp(relative, -maxTurretAngle, maxTurretAngle);
-
-        turret.rotation = Quaternion.Euler(0f, 0f, bodyAngle + clamped);
+        TurretHelper.AimAt(turret, targetPos, rb.rotation, maxTurretAngle);
     }
 }
