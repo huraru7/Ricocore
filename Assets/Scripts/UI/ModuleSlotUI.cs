@@ -36,32 +36,24 @@ public class ModuleSlotUI : MonoBehaviour,
     // -------------------------------------------------------
 
     /// <summary>
-    /// 初期化。スロット・情報パネル・クリックコールバック・ラベル文字列を受け取る。
-    /// label は省略可能（インベントリスロットには番号、部位スロットには「砲塔」等を渡す）。
-    /// actionButtonLabel: ホバー時に情報パネルに表示するボタンのラベル（"装着" or "取り外し"）
-    /// slotColor: 境界線の色（Color.clear で変更なし）
+    /// 初期化。設定をまとめた <see cref="ModuleSlotUIConfig"/> を1つ受け取る。
+    /// インベントリスロット・部位スロットどちらにも使用できる。
     /// </summary>
-    public void Initialize(
-        ModuleSlot                slot,
-        ModuleInfoPanel           infoPanel,
-        System.Action<ModuleSlot> onClickCallback,
-        string                    label             = "",
-        string                    actionButtonLabel = "装着",
-        Color                     slotColor         = default)
+    public void Initialize(ModuleSlotUIConfig config)
     {
-        this.slot              = slot;
-        this.infoPanel         = infoPanel;
-        this.onClickCallback   = onClickCallback;
-        this.actionButtonLabel = actionButtonLabel;
+        this.slot              = config.Slot;
+        this.infoPanel         = config.InfoPanel;
+        this.onClickCallback   = config.OnClick;
+        this.actionButtonLabel = config.ActionButtonLabel;
 
         if (labelText != null)
-            labelText.text = label;
+            labelText.text = config.Label;
 
         if (hoverHighlight != null)
             hoverHighlight.SetActive(false);
 
-        if (borderImage != null && slotColor != default)
-            borderImage.color = slotColor;
+        if (borderImage != null && config.SlotColor != Color.clear)
+            borderImage.color = config.SlotColor;
 
         // スロットの変化を購読して自動更新
         slot.OnChanged += OnSlotChanged;
