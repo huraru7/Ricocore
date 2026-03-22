@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// スロットにカーソルを合わせた際にモジュール情報を表示するパネル。
-/// ModuleSlotUI がホバー時に Show(module) / Hide() を呼ぶ。
+/// ModuleSlotUI がホバー時に Show(module, onButtonClick, buttonLabel) / Hide() を呼ぶ。
 /// </summary>
 public class ModuleInfoPanel : MonoBehaviour
 {
@@ -19,22 +19,46 @@ public class ModuleInfoPanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI statsText;
     [SerializeField] private TextMeshProUGUI compatibleSlotsText;
 
+    [Header("アクションボタン（装着/取り外し）")]
+    [SerializeField] private Button          actionButton;
+    [SerializeField] private TextMeshProUGUI actionButtonText;
+
     private readonly StringBuilder sb = new StringBuilder();
 
     // -------------------------------------------------------
 
     void Awake() => root.SetActive(false);
 
-    /// <summary>指定モジュールの情報をパネルに表示する</summary>
-    public void Show(Module module)
+    /// <summary>
+    /// 指定モジュールの情報をパネルに表示する。
+    /// onButtonClick: ボタン押下時のコールバック（null なら非表示）
+    /// buttonLabel: ボタンのラベル（"装着" or "取り外し"）
+    /// </summary>
+    public void Show(Module module, System.Action onButtonClick, string buttonLabel)
     {
         root.SetActive(true);
 
-        iconImage.sprite      = module.Icon;
-        nameText.text         = module.Name;
-        descriptionText.text  = module.Description;
-        statsText.text        = BuildStatsText(module);
+        iconImage.sprite         = module.Icon;
+        nameText.text            = module.Name;
+        descriptionText.text     = module.Description;
+        statsText.text           = BuildStatsText(module);
         compatibleSlotsText.text = BuildCompatibleSlotsText(module);
+
+        if (actionButton != null)
+        {
+            actionButton.onClick.RemoveAllListeners();
+            if (onButtonClick != null)
+            {
+                actionButton.gameObject.SetActive(true);
+                actionButton.onClick.AddListener(() => onButtonClick());
+                if (actionButtonText != null)
+                    actionButtonText.text = buttonLabel;
+            }
+            else
+            {
+                actionButton.gameObject.SetActive(false);
+            }
+        }
     }
 
     /// <summary>パネルを非表示にする</summary>

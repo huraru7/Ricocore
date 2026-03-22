@@ -25,6 +25,13 @@ public class TankModuleManager : MonoBehaviour
     public Dictionary<TankSlot, ModuleSlot> PartSlots { get; private set; }
 
     private PlayerStats playerStats;
+    private StatBonus   lastBonus;
+
+    /// <summary>モジュール装着/取り外しでボーナスが変化した際に発火する</summary>
+    public event System.Action OnModuleChanged;
+
+    /// <summary>現在装着中モジュールによるボーナス合計（TankStatsPanel等で参照）</summary>
+    public StatBonus CurrentModuleBonus => lastBonus;
 
     // -------------------------------------------------------
 
@@ -162,7 +169,9 @@ public class TankModuleManager : MonoBehaviour
             total.maxAmmo      += b.maxAmmo;
         }
 
+        lastBonus = total;
         playerStats.SetModuleBonus(total);
+        OnModuleChanged?.Invoke();
     }
 
     private void CallEquipEffects(Module module)
