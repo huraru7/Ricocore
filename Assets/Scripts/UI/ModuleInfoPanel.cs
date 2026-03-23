@@ -102,12 +102,12 @@ public class ModuleInfoPanel : MonoBehaviour
         return "装着可能: " + string.Join(", ", names);
     }
 
-    private static string GetSlotDisplayName(TankSlot slot) => slot switch
+    private static string GetSlotDisplayName(SlotType slot) => slot switch
     {
-        TankSlot.Turret           => "砲塔",
-        TankSlot.Engine           => "エンジン",
-        TankSlot.RightCaterpillar => "右キャタピラー",
-        TankSlot.LeftCaterpillar  => "左キャタピラー",
+        SlotType.Turret           => "砲塔",
+        SlotType.Engine           => "エンジン",
+        SlotType.RightCaterpillar => "右キャタピラー",
+        SlotType.LeftCaterpillar  => "左キャタピラー",
         _                         => slot.ToString()
     };
 }

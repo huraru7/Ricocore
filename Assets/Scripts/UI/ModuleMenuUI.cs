@@ -7,26 +7,22 @@ using UnityEngine.InputSystem;
 /// 設計:
 ///   - 各セクション（Inventory / TankStatus / Info / EquipmentSection）を
 ///     子コンポーネントに委譲し、このクラスは開閉制御のみ担う
-///   - 部位スロット UI (4つ) は ModuleSlotUIConfig を使って初期化する
+///   - 部位スロット UI は EquipSystem.GetPartSlot() で取得した PartSlot を使う
+///   - 部位スロット UI は ModuleSlotUIConfig を使って初期化する
 ///
-/// シーン構成:
-///   ModuleMenu (このコンポーネントをアタッチ, 初期非表示)
-///   ├── Inventory        → InventoryUI
-///   ├── TankStatus       → (次回以降)
-///   ├── Info             → ModuleInfoPanel
-///   └── EquipmentSection → (次回以降、部位スロット UI を含む)
+/// Canvas にアタッチすること（常にアクティブな親に置く必要がある）
 /// </summary>
 public class ModuleMenuUI : MonoBehaviour
 {
     [Header("参照")]
-    [SerializeField] private TankModuleManager moduleManager;
-    [SerializeField] private GameObject        menuRoot;
-    [SerializeField] private ModuleInfoPanel   infoPanel;
+    [SerializeField] private EquipSystem     equipSystem;
+    [SerializeField] private GameObject      menuRoot;
+    [SerializeField] private ModuleInfoPanel infoPanel;
 
     [Header("インベントリ")]
     [SerializeField] private InventoryUI inventoryUI;
 
-    [Header("部位スロット欄（4つ固定）")]
+    [Header("部位スロット欄（4つ固定、未設定は自動スキップ）")]
     [SerializeField] private ModuleSlotUI slotTurret;
     [SerializeField] private ModuleSlotUI slotEngine;
     [SerializeField] private ModuleSlotUI slotRightCaterpillar;
@@ -46,45 +42,25 @@ public class ModuleMenuUI : MonoBehaviour
     {
         menuRoot.SetActive(false);
 
-        // 部位スロット UI を Config 形式で初期化（クリック → 取り外してインベントリへ）
-        slotTurret.Initialize(new ModuleSlotUIConfig
-        {
-            Slot              = moduleManager.PartSlots[TankSlot.Turret],
-            InfoPanel         = infoPanel,
-            OnClick           = _ => moduleManager.UnequipFromPart(TankSlot.Turret),
-            Label             = "砲塔",
-            ActionButtonLabel = "取り外し",
-            SlotColor         = ColorTurret
-        });
+        // 部位スロット UI を Config 形式で初期化（null のものは自動スキップ）
+        InitializePartSlot(slotTurret,           SlotType.Turret,           "砲塔",          ColorTurret);
+        InitializePartSlot(slotEngine,           SlotType.Engine,           "エンジン",       ColorEngine);
+        InitializePartSlot(slotRightCaterpillar, SlotType.RightCaterpillar, "右キャタピラー",  ColorRightCaterpillar);
+        InitializePartSlot(slotLeftCaterpillar,  SlotType.LeftCaterpillar,  "左キャタピラー",  ColorLeftCaterpillar);
+    }
 
-        slotEngine.Initialize(new ModuleSlotUIConfig
-        {
-            Slot              = moduleManager.PartSlots[TankSlot.Engine],
-            InfoPanel         = infoPanel,
-            OnClick           = _ => moduleManager.UnequipFromPart(TankSlot.Engine),
-            Label             = "エンジン",
-            ActionButtonLabel = "取り外し",
-            SlotColor         = ColorEngine
-        });
+    private void InitializePartSlot(ModuleSlotUI ui, SlotType part, string label, Color color)
+    {
+        if (ui == null) return; // 未設定のスロットはスキップ
 
-        slotRightCaterpillar.Initialize(new ModuleSlotUIConfig
+        ui.Initialize(new ModuleSlotUIConfig
         {
-            Slot              = moduleManager.PartSlots[TankSlot.RightCaterpillar],
+            Slot              = equipSystem.GetPartSlot(part),
             InfoPanel         = infoPanel,
-            OnClick           = _ => moduleManager.UnequipFromPart(TankSlot.RightCaterpillar),
-            Label             = "右キャタピラー",
+            OnClick           = _ => equipSystem.TryUnequip(part),
+            Label             = label,
             ActionButtonLabel = "取り外し",
-            SlotColor         = ColorRightCaterpillar
-        });
-
-        slotLeftCaterpillar.Initialize(new ModuleSlotUIConfig
-        {
-            Slot              = moduleManager.PartSlots[TankSlot.LeftCaterpillar],
-            InfoPanel         = infoPanel,
-            OnClick           = _ => moduleManager.UnequipFromPart(TankSlot.LeftCaterpillar),
-            Label             = "左キャタピラー",
-            ActionButtonLabel = "取り外し",
-            SlotColor         = ColorLeftCaterpillar
+            SlotColor         = color
         });
     }
 
@@ -100,8 +76,8 @@ public class ModuleMenuUI : MonoBehaviour
         menuRoot.SetActive(isOpen);
 
         if (isOpen)
-            inventoryUI.ResetFilter(); // メニューを開いたら ALL タブに戻す
-        else
+            inventoryUI.ResetFilter();    // メニューを開いたら ALL タブに戻す
+        else if (infoPanel != null)
             infoPanel.Hide();
     }
 }

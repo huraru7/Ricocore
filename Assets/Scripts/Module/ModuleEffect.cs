@@ -3,15 +3,14 @@ using UnityEngine;
 /// <summary>
 /// モジュールの特殊効果の基底クラス。
 /// 新しい特殊効果はこれを継承した ScriptableObject を1ファイル追加するだけで実装できる。
-/// TankModuleManager や ModuleDefinition 本体の変更は不要。
 /// </summary>
 public abstract class ModuleEffect : ScriptableObject
 {
-    /// <summary>モジュール装着時に呼ばれる</summary>
-    public abstract void OnEquip(TankModuleManager manager);
+    /// <summary>モジュールが部位スロットへ装着された時に呼ばれる</summary>
+    public abstract void OnEquip(EquipSystem equipSystem);
 
-    /// <summary>モジュール取り外し時に呼ばれる</summary>
-    public abstract void OnUnequip(TankModuleManager manager);
+    /// <summary>モジュールが部位スロットから取り外された時に呼ばれる</summary>
+    public abstract void OnUnequip(EquipSystem equipSystem);
 
     /// <summary>
     /// このエフェクトが StatBonus へ寄与する値を返す。

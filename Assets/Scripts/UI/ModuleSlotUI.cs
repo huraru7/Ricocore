@@ -28,7 +28,7 @@ public class ModuleSlotUI : MonoBehaviour,
     [SerializeField] private Sprite emptySprite;
 
     // ---- ランタイム状態 ----
-    private ModuleSlot      slot;
+    private ModuleSlot slot;
     private ModuleInfoPanel infoPanel;
     private System.Action<ModuleSlot> onClickCallback;
     private string actionButtonLabel = "装着";
@@ -52,18 +52,18 @@ public class ModuleSlotUI : MonoBehaviour,
         if (hoverHighlight != null)
             hoverHighlight.SetActive(false);
 
-        if (borderImage != null && config.SlotColor != Color.clear)
+        if (borderImage != null && config.SlotColor != UnityEngine.Color.clear)
             borderImage.color = config.SlotColor;
 
-        // スロットの変化を購読して自動更新
-        slot.OnChanged += OnSlotChanged;
+        // スロットの変化を購読して自動更新（OnChanged は引数なし）
+        slot.OnChanged += Refresh;
         Refresh();
     }
 
     void OnDestroy()
     {
         if (slot != null)
-            slot.OnChanged -= OnSlotChanged;
+            slot.OnChanged -= Refresh;
     }
 
     // -------------------------------------------------------
@@ -74,7 +74,7 @@ public class ModuleSlotUI : MonoBehaviour,
         if (hoverHighlight != null)
             hoverHighlight.SetActive(true);
 
-        if (slot.HasModule)
+        if (slot.HasModule && infoPanel != null)
             infoPanel.Show(slot.Module, () => onClickCallback?.Invoke(slot), actionButtonLabel);
     }
 
@@ -83,7 +83,8 @@ public class ModuleSlotUI : MonoBehaviour,
         if (hoverHighlight != null)
             hoverHighlight.SetActive(false);
 
-        infoPanel.Hide();
+        if (infoPanel != null)
+            infoPanel.Hide();
     }
 
     public void OnPointerClick(PointerEventData _)
@@ -93,8 +94,6 @@ public class ModuleSlotUI : MonoBehaviour,
 
     // -------------------------------------------------------
     // 内部処理
-
-    private void OnSlotChanged(ModuleSlot _) => Refresh();
 
     private void Refresh()
     {

@@ -22,8 +22,8 @@ using UnityEngine.UI;
 public class TankStatsPanel : MonoBehaviour
 {
     [Header("参照")]
-    [SerializeField] private PlayerStats       playerStats;
-    [SerializeField] private TankModuleManager moduleManager;
+    [SerializeField] private PlayerStats playerStats;
+    [SerializeField] private StatsSystem statsSystem;
 
     [Header("各ステータス行")]
     [SerializeField] private StatRowUI hpRow;
@@ -37,20 +37,22 @@ public class TankStatsPanel : MonoBehaviour
 
     void OnEnable()
     {
-        moduleManager.OnModuleChanged += Refresh;
+        if (statsSystem != null)
+            statsSystem.OnChanged += Refresh;
         Refresh();
     }
 
     void OnDisable()
     {
-        moduleManager.OnModuleChanged -= Refresh;
+        if (statsSystem != null)
+            statsSystem.OnChanged -= Refresh;
     }
 
     // -------------------------------------------------------
 
     private void Refresh()
     {
-        var bonus = moduleManager.CurrentModuleBonus;
+        var bonus = statsSystem != null ? statsSystem.CurrentBonus : default;
 
         hpRow.Set(playerStats.MaxHp,         bonus.hp);
         moveSpeedRow.Set(playerStats.MoveSpeed,    bonus.moveSpeed);

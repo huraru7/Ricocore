@@ -9,7 +9,7 @@ public class StatBonusEffect : ModuleEffect
 {
     [SerializeField] private StatBonus bonus;
 
-    public override void OnEquip(TankModuleManager manager) { }
-    public override void OnUnequip(TankModuleManager manager) { }
+    public override void OnEquip(EquipSystem equipSystem) { }
+    public override void OnUnequip(EquipSystem equipSystem) { }
     public override StatBonus GetStatBonus() => bonus;
 }

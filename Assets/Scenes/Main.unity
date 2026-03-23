@@ -360,6 +360,8 @@ GameObject:
   - component: {fileID: 183090467}
   - component: {fileID: 183090472}
   - component: {fileID: 183090473}
+  - component: {fileID: 183090475}
+  - component: {fileID: 183090474}
   m_Layer: 0
   m_Name: Tank
   m_TagString: Untagged
@@ -499,6 +501,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8814c0ec837038c4998e03948a860cd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameRuntime::TankModuleManager
+--- !u!114 &183090474
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 183090466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f10f170f410116440b444d48e53fdcb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameRuntime::StatsSystem
+--- !u!114 &183090475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 183090466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 019b292f378b91242bb403ddf6c708e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameRuntime::EquipSystem
   inventorySize: 10
 --- !u!1 &221672314
 GameObject:
@@ -1625,7 +1651,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -351, y: -31}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &641119360
@@ -1640,7 +1666,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 237909844b8a8c8438e4b10885fc9203, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameRuntime::InventoryUI
-  moduleManager: {fileID: 183090473}
+  equipSystem: {fileID: 0}
   infoPanel: {fileID: 0}
   tabButtons:
   - {fileID: 2001174712}
@@ -2095,6 +2121,7 @@ GameObject:
   - component: {fileID: 860459799}
   - component: {fileID: 860459798}
   - component: {fileID: 860459797}
+  - component: {fileID: 860459801}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -2187,6 +2214,26 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &860459801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860459796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52469990eed074d408093a4454e5c05a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameRuntime::ModuleMenuUI
+  equipSystem: {fileID: 0}
+  menuRoot: {fileID: 1183201308}
+  infoPanel: {fileID: 0}
+  inventoryUI: {fileID: 641119360}
+  slotTurret: {fileID: 0}
+  slotEngine: {fileID: 0}
+  slotRightCaterpillar: {fileID: 0}
+  slotLeftCaterpillar: {fileID: 0}
 --- !u!1 &867689119
 GameObject:
   m_ObjectHideFlags: 0
@@ -2685,7 +2732,6 @@ GameObject:
   - component: {fileID: 1183201309}
   - component: {fileID: 1183201312}
   - component: {fileID: 1183201311}
-  - component: {fileID: 1183201310}
   m_Layer: 5
   m_Name: ModuleMenu
   m_TagString: Untagged
@@ -2710,29 +2756,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -0.5, y: 0}
+  m_SizeDelta: {x: -1, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1183201310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1183201308}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52469990eed074d408093a4454e5c05a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: GameRuntime::ModuleMenuUI
-  moduleManager: {fileID: 183090473}
-  menuRoot: {fileID: 1183201308}
-  infoPanel: {fileID: 0}
-  inventoryUI: {fileID: 641119360}
-  slotTurret: {fileID: 0}
-  slotEngine: {fileID: 0}
-  slotRightCaterpillar: {fileID: 0}
-  slotLeftCaterpillar: {fileID: 0}
 --- !u!114 &1183201311
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2950,13 +2976,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1340859411}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2, y: 2, z: 0}
-  m_LocalScale: {x: 3, y: 0.2, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0.33106315, w: 0.94360864}
+  m_LocalPosition: {x: 1.1, y: 0.93, z: 0}
+  m_LocalScale: {x: 6.2093997, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1743115343}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -38.667}
 --- !u!114 &1340859414
 MonoBehaviour:
   m_ObjectHideFlags: 0

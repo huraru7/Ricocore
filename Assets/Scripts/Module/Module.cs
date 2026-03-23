@@ -12,10 +12,10 @@ public class Module
     public ModuleDefinition Definition { get; }
 
     // ---- ModuleDefinition へのショートカット ----
-    public string     Name           => Definition.moduleName;
-    public string     Description    => Definition.description;
-    public Sprite     Icon           => Definition.icon;
-    public TankSlot[] CompatibleSlots => Definition.compatibleSlots;
+    public string      Name            => Definition.moduleName;
+    public string      Description     => Definition.description;
+    public Sprite      Icon            => Definition.icon;
+    public SlotType[]  CompatibleSlots => Definition.compatibleSlots;
 
     public Module(ModuleDefinition definition)
     {
@@ -26,5 +26,5 @@ public class Module
     public StatBonus GetTotalStatBonus() => Definition.GetTotalStatBonus();
 
     /// <summary>指定スロットに装着可能かを返す</summary>
-    public bool IsCompatible(TankSlot slot) => Definition.IsCompatible(slot);
+    public bool IsCompatible(SlotType slot) => Definition.IsCompatible(slot);
 }

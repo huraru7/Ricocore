@@ -13,7 +13,7 @@ public class ModuleSlotUIConfig
     /// <summary>紐づけるモジュールスロット（必須）</summary>
     public ModuleSlot Slot;
 
-    /// <summary>ホバー時に情報を表示するパネル（必須）</summary>
+    /// <summary>ホバー時に情報を表示するパネル（null でも動作する）</summary>
     public ModuleInfoPanel InfoPanel;
 
     /// <summary>スロットをクリックしたときの処理</summary>

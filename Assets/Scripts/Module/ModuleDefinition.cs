@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// モジュール1種類のデータを保持する ScriptableObject。
+/// モジュール1種類のデータを保持する ScriptableObject（テンプレート）。
 /// Assets > Create > TankGame > Module > ModuleDefinition で作成する。
 /// </summary>
 [CreateAssetMenu(fileName = "Module_New", menuName = "TankGame/Module/ModuleDefinition")]
@@ -16,7 +16,7 @@ public class ModuleDefinition : ScriptableObject
     public Sprite icon;
 
     [Header("装着可能スロット")]
-    public TankSlot[] compatibleSlots;
+    public SlotType[] compatibleSlots;
 
     [Header("効果")]
     public StatBonus statBonus;
@@ -52,7 +52,7 @@ public class ModuleDefinition : ScriptableObject
     }
 
     /// <summary>指定スロットにこのモジュールが装着可能かを返す</summary>
-    public bool IsCompatible(TankSlot slot)
+    public bool IsCompatible(SlotType slot)
     {
         if (compatibleSlots == null) return false;
         foreach (var s in compatibleSlots)

@@ -1,8 +1,10 @@
 /// <summary>
-/// モジュールを1つ保持するスロット。
-/// インベントリスロットと部位スロット（砲塔・エンジン等）の両方に使用する。
-/// モジュールが変化した際は OnChanged イベントが発火するため、
-/// UI はこのイベントを購読することで自動的に更新できる。
+/// モジュールを1つ保持するスロット。インベントリ・部位スロットの両方に使用する。
+///
+/// 設計原則:
+///   - ただの「箱」に徹する。ロジックは持たない
+///   - Set / Remove でのみ状態が変化し、変化時は OnChanged を発火する
+///   - 互換性判定・装備処理は EquipSystem / SlotTransfer が行う
 /// </summary>
 public class ModuleSlot
 {
@@ -13,23 +15,23 @@ public class ModuleSlot
     public bool HasModule => Module != null;
 
     /// <summary>モジュールが変化した際に発火するイベント</summary>
-    public event System.Action<ModuleSlot> OnChanged;
+    public event System.Action OnChanged;
 
     // -------------------------------------------------------
 
-    /// <summary>モジュールをこのスロットに配置する（上書き不可。事前に Take すること）</summary>
-    public void Place(Module module)
+    /// <summary>モジュールをこのスロットにセットする</summary>
+    public void Set(Module module)
     {
         Module = module;
-        OnChanged?.Invoke(this);
+        OnChanged?.Invoke();
     }
 
-    /// <summary>スロットからモジュールを取り出して返す。空なら null を返す。</summary>
-    public Module Take()
+    /// <summary>スロットからモジュールを取り出して返す。スロットは空になる。</summary>
+    public Module Remove()
     {
         var m = Module;
         Module = null;
-        OnChanged?.Invoke(this);
+        OnChanged?.Invoke();
         return m;
     }
 }
