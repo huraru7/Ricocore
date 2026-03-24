@@ -15,6 +15,9 @@ public class EnemyData : ScriptableObject
     [Header("耐久")]
     public int maxHp = 2;
 
+    [Header("経験値")]
+    public int expReward = 10;
+
     [Header("ドロップ")]
     [Range(0f, 1f)] public float dropChance = 0.5f;
     public ModuleDropEntry[] dropTable;
