@@ -40,16 +40,6 @@ public class InventoryUI : MonoBehaviour
 
     private SlotType activeFilter = SlotType.None;
 
-    // 部位ごとの色（タブボタンの色分けに使用）
-    private static Color SlotColor(SlotType slot) => slot switch
-    {
-        SlotType.Turret           => new Color(0.29f, 0.56f, 0.85f), // 青
-        SlotType.Engine           => new Color(0.96f, 0.65f, 0.14f), // 黄
-        SlotType.RightCaterpillar => new Color(0.82f, 0.01f, 0.11f), // 赤
-        SlotType.LeftCaterpillar  => new Color(0.49f, 0.82f, 0.13f), // 緑
-        _                         => Color.white
-    };
-
     // -------------------------------------------------------
 
     void Awake()

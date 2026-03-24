@@ -30,12 +30,6 @@ public class ModuleMenuUI : MonoBehaviour
 
     private bool isOpen;
 
-    // 部位ごとの色
-    private static readonly Color ColorTurret           = new Color(0.29f, 0.56f, 0.85f); // 青
-    private static readonly Color ColorEngine           = new Color(0.96f, 0.65f, 0.14f); // 黄
-    private static readonly Color ColorRightCaterpillar = new Color(0.82f, 0.01f, 0.11f); // 赤
-    private static readonly Color ColorLeftCaterpillar  = new Color(0.49f, 0.82f, 0.13f); // 緑
-
     // -------------------------------------------------------
 
     void Awake()
@@ -43,13 +37,13 @@ public class ModuleMenuUI : MonoBehaviour
         menuRoot.SetActive(false);
 
         // 部位スロット UI を Config 形式で初期化（null のものは自動スキップ）
-        InitializePartSlot(slotTurret,           SlotType.Turret,           "砲塔",          ColorTurret);
-        InitializePartSlot(slotEngine,           SlotType.Engine,           "エンジン",       ColorEngine);
-        InitializePartSlot(slotRightCaterpillar, SlotType.RightCaterpillar, "右キャタピラー",  ColorRightCaterpillar);
-        InitializePartSlot(slotLeftCaterpillar,  SlotType.LeftCaterpillar,  "左キャタピラー",  ColorLeftCaterpillar);
+        InitializePartSlot(slotTurret,           SlotType.Turret,           "砲塔");
+        InitializePartSlot(slotEngine,           SlotType.Engine,           "エンジン");
+        InitializePartSlot(slotRightCaterpillar, SlotType.RightCaterpillar, "右キャタピラー");
+        InitializePartSlot(slotLeftCaterpillar,  SlotType.LeftCaterpillar,  "左キャタピラー");
     }
 
-    private void InitializePartSlot(ModuleSlotUI ui, SlotType part, string label, Color color)
+    private void InitializePartSlot(ModuleSlotUI ui, SlotType part, string label)
     {
         if (ui == null) return; // 未設定のスロットはスキップ
 
@@ -60,7 +54,7 @@ public class ModuleMenuUI : MonoBehaviour
             OnClick           = _ => equipSystem.TryUnequip(part),
             Label             = label,
             ActionButtonLabel = "取り外し",
-            SlotColor         = color
+            SlotColor         = SlotTypeColor.Get(part)
         });
     }
 
