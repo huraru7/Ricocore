@@ -23,11 +23,18 @@ public class ModuleInfoPanel : MonoBehaviour
     [SerializeField] private Button          actionButton;
     [SerializeField] private TextMeshProUGUI actionButtonText;
 
+    /// <summary>シーン内の唯一の ModuleInfoPanel へのアクセス用</summary>
+    public static ModuleInfoPanel Instance { get; private set; }
+
     private readonly StringBuilder sb = new StringBuilder();
 
     // -------------------------------------------------------
 
-    void Awake() => root.SetActive(false);
+    void Awake()
+    {
+        Instance = this;
+        root.SetActive(false);
+    }
 
     /// <summary>
     /// 指定モジュールの情報をパネルに表示する。

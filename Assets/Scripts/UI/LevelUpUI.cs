@@ -5,6 +5,9 @@ using UnityEngine;
 /// レベルアップ時に 3 択のモジュール選択画面を表示するコントローラ。
 /// Canvas 直下にアタッチすること（常にアクティブな親に置く必要がある）。
 ///
+/// ExperienceSystem / TankModuleManager / ModuleDatabase は
+/// PlayerSystemHub.Instance から自動取得するため SerializeField 設定不要。
+///
 /// フロー:
 ///   1. ExperienceSystem.OnLevelUp 発火
 ///   2. ModuleDatabase.GetRandom(3) でランダムな選択肢を取得
@@ -25,40 +28,36 @@ using UnityEngine;
 /// </summary>
 public class LevelUpUI : MonoBehaviour
 {
-    [Header("参照")]
-    [SerializeField] private ExperienceSystem   expSystem;
-    [SerializeField] private TankModuleManager  moduleManager;
-    [SerializeField] private ModuleDatabase     database;
-
     [Header("UI")]
-    [SerializeField] private GameObject          root;      // 表示/非表示するパネル
-    [SerializeField] private TextMeshProUGUI     levelText; // "Level Up!  Lv.X" 表示
-    [SerializeField] private ModuleRewardCardUI[] cards;    // 3 枚のカード
+    [SerializeField] private GameObject           root;      // 表示/非表示するパネル
+    [SerializeField] private TextMeshProUGUI      levelText; // "Level Up!  Lv.X" 表示
+    [SerializeField] private ModuleRewardCardUI[] cards;     // 3 枚のカード
 
     // -------------------------------------------------------
 
     void Awake()
     {
         root.SetActive(false);
+    }
 
-        Debug.Assert(expSystem    != null, "[LevelUpUI] ExperienceSystem が未設定です");
-        Debug.Assert(moduleManager != null, "[LevelUpUI] TankModuleManager が未設定です");
-        Debug.Assert(database     != null, "[LevelUpUI] ModuleDatabase が未設定です");
-
-        expSystem.OnLevelUp += OnLevelUp;
+    void Start()
+    {
+        // PlayerSystemHub.Instance は全 Awake 完了後に確実に存在する
+        PlayerSystemHub.Instance.ExpSystem.OnLevelUp += OnLevelUp;
     }
 
     void OnDestroy()
     {
-        if (expSystem != null)
-            expSystem.OnLevelUp -= OnLevelUp;
+        if (PlayerSystemHub.Instance != null)
+            PlayerSystemHub.Instance.ExpSystem.OnLevelUp -= OnLevelUp;
     }
 
     // -------------------------------------------------------
 
     private void OnLevelUp(int newLevel)
     {
-        if (database.modules == null || database.modules.Length == 0)
+        var database = PlayerSystemHub.Instance.ModuleDatabase;
+        if (database == null || database.modules == null || database.modules.Length == 0)
         {
             Debug.LogWarning("[LevelUpUI] ModuleDatabase にモジュールが登録されていません。");
             return;
@@ -85,7 +84,7 @@ public class LevelUpUI : MonoBehaviour
 
     private void OnCardSelected(ModuleDefinition def)
     {
-        moduleManager.AcquireModule(def);
+        PlayerSystemHub.Instance.ModuleManager.AcquireModule(def);
         root.SetActive(false);
         Time.timeScale = 1f; // ゲーム再開
     }

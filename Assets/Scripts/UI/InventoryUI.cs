@@ -10,6 +10,9 @@ using UnityEngine.UI;
 ///   - フィルタ変更やモジュール変化に応じて表示/非表示を更新する
 ///   - ModuleMenuUI から ResetFilter() を受け取って ALL タブに戻す
 ///
+/// EquipSystem / ModuleInfoPanel は PlayerSystemHub.Instance / ModuleInfoPanel.Instance
+/// から自動取得するため SerializeField 設定不要。
+///
 /// シーン構成:
 ///   Inventory (このコンポーネントをアタッチ)
 ///   ├── TabBar
@@ -25,50 +28,36 @@ using UnityEngine.UI;
 /// </summary>
 public class InventoryUI : MonoBehaviour
 {
-    [Header("参照")]
-    [SerializeField] private EquipSystem     equipSystem;
-    [SerializeField] private ModuleInfoPanel infoPanel;
-
     [Header("タブ（ALL から順に設定）")]
-    [SerializeField] private Button[]    tabButtons;   // ALL / 砲塔 / エンジン / 右 / 左
-    [SerializeField] private SlotType[]  tabSlots;     // None / Turret / Engine / Right / Left
-    [SerializeField] private Color       tabActiveColor   = Color.white;
-    [SerializeField] private Color       tabInactiveColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+    [SerializeField] private Button[]   tabButtons;   // ALL / 砲塔 / エンジン / 右 / 左
+    [SerializeField] private SlotType[] tabSlots;     // None / Turret / Engine / Right / Left
+    [SerializeField] private Color      tabActiveColor   = Color.white;
+    [SerializeField] private Color      tabInactiveColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 
     [Header("インベントリスロット UI（EquipSystem の inventorySize と同数）")]
     [SerializeField] private ModuleSlotUI[] slotUIs;
 
     private SlotType activeFilter = SlotType.None;
+    private bool     initialized;
 
     // -------------------------------------------------------
 
-    void Awake()
+    void Start()
     {
         InitializeSlots();
         InitializeTabs();
+        SubscribeEvents();
+        initialized = true;
     }
 
     void OnEnable()
     {
-        // EquipSystem が PartSlots を変更したとき（装着/取り外し）に再フィルタリング
-        if (equipSystem != null)
-        {
-            foreach (var ps in equipSystem.PartSlots)
-                ps.OnChanged += RefreshDisplay;
-            foreach (var inv in equipSystem.InventorySlots)
-                inv.OnChanged += RefreshDisplay;
-        }
+        if (initialized) SubscribeEvents();
     }
 
     void OnDisable()
     {
-        if (equipSystem != null)
-        {
-            foreach (var ps in equipSystem.PartSlots)
-                ps.OnChanged -= RefreshDisplay;
-            foreach (var inv in equipSystem.InventorySlots)
-                inv.OnChanged -= RefreshDisplay;
-        }
+        if (initialized) UnsubscribeEvents();
     }
 
     // -------------------------------------------------------
@@ -83,22 +72,37 @@ public class InventoryUI : MonoBehaviour
     // -------------------------------------------------------
     // 内部処理
 
+    private void SubscribeEvents()
+    {
+        var eq = PlayerSystemHub.Instance.EquipSystem;
+        foreach (var ps in eq.PartSlots)       ps.OnChanged  += RefreshDisplay;
+        foreach (var inv in eq.InventorySlots)  inv.OnChanged += RefreshDisplay;
+    }
+
+    private void UnsubscribeEvents()
+    {
+        if (PlayerSystemHub.Instance == null) return;
+        var eq = PlayerSystemHub.Instance.EquipSystem;
+        foreach (var ps in eq.PartSlots)       ps.OnChanged  -= RefreshDisplay;
+        foreach (var inv in eq.InventorySlots)  inv.OnChanged -= RefreshDisplay;
+    }
+
     private void InitializeSlots()
     {
-        if (equipSystem == null) return;
+        var eq = PlayerSystemHub.Instance.EquipSystem;
 
-        int count = Mathf.Min(slotUIs.Length, equipSystem.InventorySlots.Length);
+        int count = Mathf.Min(slotUIs.Length, eq.InventorySlots.Length);
 
-        if (slotUIs.Length != equipSystem.InventorySlots.Length)
-            Debug.LogWarning($"[InventoryUI] SlotUI 数 ({slotUIs.Length}) と InventorySlots 数 ({equipSystem.InventorySlots.Length}) が異なります。");
+        if (slotUIs.Length != eq.InventorySlots.Length)
+            Debug.LogWarning($"[InventoryUI] SlotUI 数 ({slotUIs.Length}) と InventorySlots 数 ({eq.InventorySlots.Length}) が異なります。");
 
         for (int i = 0; i < count; i++)
         {
             var config = new ModuleSlotUIConfig
             {
-                Slot              = equipSystem.InventorySlots[i],
-                InfoPanel         = infoPanel,
-                OnClick           = slot => equipSystem.TryEquip(slot),
+                Slot              = eq.InventorySlots[i],
+                InfoPanel         = ModuleInfoPanel.Instance,
+                OnClick           = slot => eq.TryEquip(slot),
                 Label             = (i + 1).ToString(),
                 ActionButtonLabel = "装着",
                 SlotColor         = Color.clear
@@ -125,8 +129,8 @@ public class InventoryUI : MonoBehaviour
     {
         activeFilter = filter;
 
-        if (infoPanel != null)
-            infoPanel.Hide();
+        if (ModuleInfoPanel.Instance != null)
+            ModuleInfoPanel.Instance.Hide();
 
         RefreshDisplay();
         UpdateTabColors();
@@ -134,12 +138,11 @@ public class InventoryUI : MonoBehaviour
 
     private void RefreshDisplay()
     {
-        if (equipSystem == null) return;
-
-        int count = Mathf.Min(slotUIs.Length, equipSystem.InventorySlots.Length);
+        var eq = PlayerSystemHub.Instance.EquipSystem;
+        int count = Mathf.Min(slotUIs.Length, eq.InventorySlots.Length);
         for (int i = 0; i < count; i++)
         {
-            var slot  = equipSystem.InventorySlots[i];
+            var slot  = eq.InventorySlots[i];
             bool show = activeFilter == SlotType.None
                      || (slot.HasModule && slot.Module.IsCompatible(activeFilter));
             slotUIs[i].gameObject.SetActive(show);

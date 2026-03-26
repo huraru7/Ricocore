@@ -1,9 +1,12 @@
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// 弾数を表示する HUD。
+/// PlayerStats は PlayerSystemHub.Instance から自動取得するため SerializeField 設定不要。
+/// </summary>
 public class AmmoUI : MonoBehaviour
 {
-    [SerializeField] private PlayerStats playerStats;
     [SerializeField] private TextMeshProUGUI ammoText;
 
     private int lastAmmo    = -1;
@@ -11,8 +14,11 @@ public class AmmoUI : MonoBehaviour
 
     void Update()
     {
-        int current = playerStats.CurrentAmmo;
-        int max     = playerStats.MaxAmmo;
+        if (PlayerSystemHub.Instance == null) return;
+        var ps = PlayerSystemHub.Instance.PlayerStats;
+
+        int current = ps.CurrentAmmo;
+        int max     = ps.MaxAmmo;
         if (current == lastAmmo && max == lastMaxAmmo) return;
         lastAmmo    = current;
         lastMaxAmmo = max;

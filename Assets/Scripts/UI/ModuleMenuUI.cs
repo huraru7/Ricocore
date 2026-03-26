@@ -7,17 +7,15 @@ using UnityEngine.InputSystem;
 /// 設計:
 ///   - 各セクション（Inventory / TankStatus / Info / EquipmentSection）を
 ///     子コンポーネントに委譲し、このクラスは開閉制御のみ担う
-///   - 部位スロット UI は EquipSystem.GetPartSlot() で取得した PartSlot を使う
-///   - 部位スロット UI は ModuleSlotUIConfig を使って初期化する
+///   - 部位スロット UI は PlayerSystemHub.Instance.EquipSystem.GetPartSlot() で取得
+///   - ModuleInfoPanel は ModuleInfoPanel.Instance で参照（SerializeField 不要）
 ///
 /// Canvas にアタッチすること（常にアクティブな親に置く必要がある）
 /// </summary>
 public class ModuleMenuUI : MonoBehaviour
 {
-    [Header("参照")]
-    [SerializeField] private EquipSystem     equipSystem;
-    [SerializeField] private GameObject      menuRoot;
-    [SerializeField] private ModuleInfoPanel infoPanel;
+    [Header("メニュー構造")]
+    [SerializeField] private GameObject  menuRoot;
 
     [Header("インベントリ")]
     [SerializeField] private InventoryUI inventoryUI;
@@ -34,9 +32,12 @@ public class ModuleMenuUI : MonoBehaviour
 
     void Awake()
     {
-        menuRoot.SetActive(false);
+        menuRoot.SetActive(false); // UIの初期状態だけ Awake で設定
+    }
 
-        // 部位スロット UI を Config 形式で初期化（null のものは自動スキップ）
+    void Start()
+    {
+        // PlayerSystemHub.Instance は全 Awake 完了後に確実に存在する
         InitializePartSlot(slotTurret,           SlotType.Turret,           "砲塔");
         InitializePartSlot(slotEngine,           SlotType.Engine,           "エンジン");
         InitializePartSlot(slotRightCaterpillar, SlotType.RightCaterpillar, "右キャタピラー");
@@ -49,9 +50,9 @@ public class ModuleMenuUI : MonoBehaviour
 
         ui.Initialize(new ModuleSlotUIConfig
         {
-            Slot              = equipSystem.GetPartSlot(part),
-            InfoPanel         = infoPanel,
-            OnClick           = _ => equipSystem.TryUnequip(part),
+            Slot              = PlayerSystemHub.Instance.EquipSystem.GetPartSlot(part),
+            InfoPanel         = ModuleInfoPanel.Instance,
+            OnClick           = _ => PlayerSystemHub.Instance.EquipSystem.TryUnequip(part),
             Label             = label,
             ActionButtonLabel = "取り外し",
             SlotColor         = SlotTypeColor.Get(part)
@@ -71,7 +72,7 @@ public class ModuleMenuUI : MonoBehaviour
 
         if (isOpen)
             inventoryUI.ResetFilter();    // メニューを開いたら ALL タブに戻す
-        else if (infoPanel != null)
-            infoPanel.Hide();
+        else if (ModuleInfoPanel.Instance != null)
+            ModuleInfoPanel.Instance.Hide();
     }
 }

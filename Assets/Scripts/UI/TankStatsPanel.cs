@@ -10,6 +10,9 @@ using UnityEngine.UI;
 ///   ボーナスなし → "3"
 ///   ボーナスあり → "3  (+1)"
 ///
+/// PlayerStats / StatsSystem は PlayerSystemHub.Instance から自動取得するため
+/// SerializeField 設定不要。
+///
 /// シーン構成（このコンポーネントをアタッチした GameObject 内に以下を配置）:
 ///   Panel_Left
 ///   ├── Row_HP          → StatRowUI (iconImage, valueText)
@@ -21,10 +24,6 @@ using UnityEngine.UI;
 /// </summary>
 public class TankStatsPanel : MonoBehaviour
 {
-    [Header("参照")]
-    [SerializeField] private PlayerStats playerStats;
-    [SerializeField] private StatsSystem statsSystem;
-
     [Header("各ステータス行")]
     [SerializeField] private StatRowUI hpRow;
     [SerializeField] private StatRowUI moveSpeedRow;
@@ -33,33 +32,41 @@ public class TankStatsPanel : MonoBehaviour
     [SerializeField] private StatRowUI bulletSpeedRow;
     [SerializeField] private StatRowUI maxAmmoRow;
 
+    private bool initialized;
+
     // -------------------------------------------------------
+
+    void Start()
+    {
+        PlayerSystemHub.Instance.StatsSystem.OnChanged += Refresh;
+        initialized = true;
+        Refresh();
+    }
 
     void OnEnable()
     {
-        if (statsSystem != null)
-            statsSystem.OnChanged += Refresh;
-        Refresh();
+        if (initialized) PlayerSystemHub.Instance.StatsSystem.OnChanged += Refresh;
     }
 
     void OnDisable()
     {
-        if (statsSystem != null)
-            statsSystem.OnChanged -= Refresh;
+        if (PlayerSystemHub.Instance != null)
+            PlayerSystemHub.Instance.StatsSystem.OnChanged -= Refresh;
     }
 
     // -------------------------------------------------------
 
     private void Refresh()
     {
-        var bonus = statsSystem != null ? statsSystem.CurrentBonus : default;
+        var bonus       = PlayerSystemHub.Instance.StatsSystem.CurrentBonus;
+        var playerStats = PlayerSystemHub.Instance.PlayerStats;
 
-        hpRow.Set(playerStats.MaxHp,         bonus.hp);
+        hpRow.Set(playerStats.MaxHp,              bonus.hp);
         moveSpeedRow.Set(playerStats.MoveSpeed,    bonus.moveSpeed);
         turnSpeedRow.Set(playerStats.TurnSpeed,    bonus.turnSpeed);
         fireCooldownRow.Set(playerStats.FireCooldown, bonus.fireCooldown);
-        bulletSpeedRow.Set(playerStats.BulletSpeed,  bonus.bulletSpeed);
-        maxAmmoRow.Set(playerStats.MaxAmmo,      bonus.maxAmmo);
+        bulletSpeedRow.Set(playerStats.BulletSpeed,   bonus.bulletSpeed);
+        maxAmmoRow.Set(playerStats.MaxAmmo,        bonus.maxAmmo);
     }
 
     // -------------------------------------------------------
