@@ -37,6 +37,9 @@ public class PlayerSystemHub : MonoBehaviour
     public ExperienceSystem  ExpSystem     { get; private set; }
     public TankModuleManager ModuleManager { get; private set; }
 
+    /// <summary>PlayerStats が所有するリアクティブステート（UI の Subscribe エントリポイント）</summary>
+    public PlayerState PlayerState => PlayerStats.State;
+
     // -------------------------------------------------------
     // ScriptableObject 参照（全 UI で共有するため唯一ここだけで設定）
 

@@ -1,3 +1,4 @@
+using R3;
 using TMPro;
 using UnityEngine;
 
@@ -5,17 +6,18 @@ using UnityEngine;
 /// レベルアップ時に 3 択のモジュール選択画面を表示するコントローラ。
 /// Canvas 直下にアタッチすること（常にアクティブな親に置く必要がある）。
 ///
-/// ExperienceSystem / TankModuleManager / ModuleDatabase は
-/// PlayerSystemHub.Instance から自動取得するため SerializeField 設定不要。
+/// PlayerState.Level を Subscribe し、レベルアップ時にパネルを表示する。
+/// LitMotion でパネル出現アニメを再生（Time.timeScale = 0 に対応）。
 ///
 /// フロー:
-///   1. ExperienceSystem.OnLevelUp 発火
-///   2. ModuleDatabase.GetRandom(3) でランダムな選択肢を取得
-///   3. 3 枚のカードに情報をセットして root パネルを表示
-///   4. Time.timeScale = 0（ゲームを一時停止）
-///   5. プレイヤーがカードを選択
-///   6. TankModuleManager.AcquireModule() でインベントリに追加
-///   7. パネルを非表示にして Time.timeScale = 1（ゲーム再開）
+///   1. PlayerState.Level が更新される（ExperienceSystem が書き込む）
+///   2. .Skip(1) で初期値（Lv.1）をスキップ
+///   3. ModuleDatabase.GetRandom(3) でランダムな選択肢を取得
+///   4. 3 枚のカードに情報をセットして root パネルを表示
+///   5. Time.timeScale = 0（ゲームを一時停止）、LitMotion でポップイン
+///   6. プレイヤーがカードを選択
+///   7. TankModuleManager.AcquireModule() でインベントリに追加
+///   8. パネルを非表示にして Time.timeScale = 1（ゲーム再開）
 ///
 /// シーン構成:
 ///   Canvas（LevelUpUI をアタッチ）
@@ -29,9 +31,9 @@ using UnityEngine;
 public class LevelUpUI : MonoBehaviour
 {
     [Header("UI")]
-    [SerializeField] private GameObject           root;      // 表示/非表示するパネル
-    [SerializeField] private TextMeshProUGUI      levelText; // "Level Up!  Lv.X" 表示
-    [SerializeField] private ModuleRewardCardUI[] cards;     // 3 枚のカード
+    [SerializeField] private GameObject           root;
+    [SerializeField] private TextMeshProUGUI      levelText;
+    [SerializeField] private ModuleRewardCardUI[] cards;
 
     // -------------------------------------------------------
 
@@ -42,19 +44,16 @@ public class LevelUpUI : MonoBehaviour
 
     void Start()
     {
-        // PlayerSystemHub.Instance は全 Awake 完了後に確実に存在する
-        PlayerSystemHub.Instance.ExpSystem.OnLevelUp += OnLevelUp;
-    }
-
-    void OnDestroy()
-    {
-        if (PlayerSystemHub.Instance != null)
-            PlayerSystemHub.Instance.ExpSystem.OnLevelUp -= OnLevelUp;
+        PlayerSystemHub.Instance.PlayerState.Level
+            .Skip(1)  // 初期値（Lv.1）をスキップ。変化した時だけ反応する
+            .Subscribe(ShowLevelUp)
+            .AddTo(this);
+        // AddTo(this) で OnDestroy 時に自動解除 — 手動購読解除不要
     }
 
     // -------------------------------------------------------
 
-    private void OnLevelUp(int newLevel)
+    private void ShowLevelUp(int newLevel)
     {
         var database = PlayerSystemHub.Instance.ModuleDatabase;
         if (database == null || database.modules == null || database.modules.Length == 0)
@@ -68,7 +67,6 @@ public class LevelUpUI : MonoBehaviour
         if (levelText != null)
             levelText.text = $"Level Up!  Lv.{newLevel}";
 
-        // カードをセットアップ（choices が 3 未満の場合は余りカードを非表示）
         int n = Mathf.Min(cards.Length, choices.Length);
         for (int i = 0; i < n; i++)
         {
@@ -79,13 +77,16 @@ public class LevelUpUI : MonoBehaviour
             cards[i].gameObject.SetActive(false);
 
         root.SetActive(true);
-        Time.timeScale = 0f; // ゲーム一時停止
+        Time.timeScale = 0f;
+
+        // timeScale = 0 のままでも動作するパネル出現アニメ
+        UIAnimations.PanelOpen(root.transform);
     }
 
     private void OnCardSelected(ModuleDefinition def)
     {
         PlayerSystemHub.Instance.ModuleManager.AcquireModule(def);
         root.SetActive(false);
-        Time.timeScale = 1f; // ゲーム再開
+        Time.timeScale = 1f;
     }
 }

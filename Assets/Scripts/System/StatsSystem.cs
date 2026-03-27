@@ -1,3 +1,4 @@
+using R3;
 using UnityEngine;
 
 /// <summary>
@@ -5,9 +6,9 @@ using UnityEngine;
 /// Player GameObject にアタッチする。
 ///
 /// 責務:
-///   - EquipSystem の PartSlots を監視し、変化時に Recalculate を呼ぶ
+///   - EquipSystem の PartSlots を R3 で監視し、変化時に Recalculate を呼ぶ
 ///   - 合計ボーナスを PlayerStats へ反映する
-///   - OnChanged イベントを発火して TankStatsPanel 等に通知する
+///   - BonusChanged ストリームを流して TankStatsPanel 等に通知する
 /// </summary>
 [RequireComponent(typeof(PlayerStats))]
 [RequireComponent(typeof(EquipSystem))]
@@ -19,8 +20,10 @@ public class StatsSystem : MonoBehaviour
     /// <summary>現在の装備ボーナス合計（TankStatsPanel 等で参照）</summary>
     public StatBonus CurrentBonus { get; private set; }
 
-    /// <summary>ボーナスが再計算された際に発火する</summary>
-    public event System.Action OnChanged;
+    private readonly Subject<Unit> _bonusChanged = new();
+
+    /// <summary>ボーナスが再計算された際に流れるストリーム（R3）</summary>
+    public Observable<Unit> BonusChanged => _bonusChanged;
 
     // -------------------------------------------------------
 
@@ -33,17 +36,17 @@ public class StatsSystem : MonoBehaviour
     void Start()
     {
         // EquipSystem.Awake() が完了してから購読する（Start で確実に担保）
+        // AddTo(this) で MonoBehaviour の破棄時に自動解除
         foreach (var slot in equipSystem.PartSlots)
-            slot.OnChanged += Recalculate;
+            slot.Changed.Subscribe(_ => Recalculate()).AddTo(this);
 
         Recalculate();
     }
 
     void OnDestroy()
     {
-        if (equipSystem == null) return;
-        foreach (var slot in equipSystem.PartSlots)
-            slot.OnChanged -= Recalculate;
+        _bonusChanged.Dispose();
+        // スロット購読は AddTo(this) で自動解除済み
     }
 
     // -------------------------------------------------------
@@ -66,6 +69,6 @@ public class StatsSystem : MonoBehaviour
 
         CurrentBonus = total;
         playerStats.SetModuleBonus(total);
-        OnChanged?.Invoke();
+        _bonusChanged.OnNext(Unit.Default);
     }
 }

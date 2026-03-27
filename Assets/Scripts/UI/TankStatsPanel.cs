@@ -1,3 +1,5 @@
+using LitMotion;
+using R3;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,7 +13,7 @@ using UnityEngine.UI;
 ///   ボーナスあり → "3  (+1)"
 ///
 /// PlayerStats / StatsSystem は PlayerSystemHub.Instance から自動取得するため
-/// SerializeField 設定不要。
+/// SerializeField 設定不要。ステータス変化時に LitMotion でポップアニメを再生する。
 ///
 /// シーン構成（このコンポーネントをアタッチした GameObject 内に以下を配置）:
 ///   Panel_Left
@@ -32,41 +34,65 @@ public class TankStatsPanel : MonoBehaviour
     [SerializeField] private StatRowUI bulletSpeedRow;
     [SerializeField] private StatRowUI maxAmmoRow;
 
-    private bool initialized;
-
     // -------------------------------------------------------
 
     void Start()
     {
-        PlayerSystemHub.Instance.StatsSystem.OnChanged += Refresh;
-        initialized = true;
+        // BonusChanged ストリームを Subscribe — ボーナス変化時に全行を更新
+        PlayerSystemHub.Instance.StatsSystem.BonusChanged
+            .Subscribe(_ => Refresh())
+            .AddTo(this);
+
         Refresh();
     }
 
     void OnEnable()
     {
-        if (initialized) PlayerSystemHub.Instance.StatsSystem.OnChanged += Refresh;
-    }
-
-    void OnDisable()
-    {
-        if (PlayerSystemHub.Instance != null)
-            PlayerSystemHub.Instance.StatsSystem.OnChanged -= Refresh;
+        // パネルが再表示された時に最新値に同期
+        if (PlayerSystemHub.Instance != null) Refresh();
     }
 
     // -------------------------------------------------------
 
     private void Refresh()
     {
-        var bonus       = PlayerSystemHub.Instance.StatsSystem.CurrentBonus;
-        var playerStats = PlayerSystemHub.Instance.PlayerStats;
+        var bonus = PlayerSystemHub.Instance.StatsSystem.CurrentBonus;
+        var ps    = PlayerSystemHub.Instance.PlayerStats;
 
-        hpRow.Set(playerStats.MaxHp,              bonus.hp);
-        moveSpeedRow.Set(playerStats.MoveSpeed,    bonus.moveSpeed);
-        turnSpeedRow.Set(playerStats.TurnSpeed,    bonus.turnSpeed);
-        fireCooldownRow.Set(playerStats.FireCooldown, bonus.fireCooldown);
-        bulletSpeedRow.Set(playerStats.BulletSpeed,   bonus.bulletSpeed);
-        maxAmmoRow.Set(playerStats.MaxAmmo,        bonus.maxAmmo);
+        SetRow(hpRow,           ps.MaxHp,           bonus.hp);
+        SetRow(moveSpeedRow,    ps.MoveSpeed,        bonus.moveSpeed);
+        SetRow(turnSpeedRow,    ps.TurnSpeed,        bonus.turnSpeed);
+        SetRow(fireCooldownRow, ps.FireCooldown,     bonus.fireCooldown);
+        SetRow(bulletSpeedRow,  ps.BulletSpeed,      bonus.bulletSpeed);
+        SetRow(maxAmmoRow,      ps.MaxAmmo,          bonus.maxAmmo);
+    }
+
+    /// <summary>float 値の行を更新。テキストが変わった場合だけポップアニメを再生。</summary>
+    private static void SetRow(StatRowUI row, float total, float bonus)
+    {
+        if (row == null || row.valueText == null) return;
+
+        string text = bonus > 0f
+            ? $"{total:0.##}  <color=#7ED321>(+{bonus:0.##})</color>"
+            : $"{total:0.##}";
+
+        if (row.valueText.text == text) return;
+        row.valueText.text = text;
+        UIAnimations.Pop(row.valueText.transform, 0.15f);
+    }
+
+    /// <summary>int 値の行を更新。テキストが変わった場合だけポップアニメを再生。</summary>
+    private static void SetRow(StatRowUI row, int total, int bonus)
+    {
+        if (row == null || row.valueText == null) return;
+
+        string text = bonus > 0
+            ? $"{total}  <color=#7ED321>(+{bonus})</color>"
+            : $"{total}";
+
+        if (row.valueText.text == text) return;
+        row.valueText.text = text;
+        UIAnimations.Pop(row.valueText.transform, 0.15f);
     }
 
     // -------------------------------------------------------
@@ -83,23 +109,5 @@ public class TankStatsPanel : MonoBehaviour
 
         [Tooltip("値を表示する TextMeshPro テキスト")]
         public TextMeshProUGUI valueText;
-
-        /// <summary>float 値を設定する（移動速度・弾速など）</summary>
-        public void Set(float total, float bonus)
-        {
-            if (valueText == null) return;
-            valueText.text = bonus > 0f
-                ? $"{total:0.##}  <color=#7ED321>(+{bonus:0.##})</color>"
-                : $"{total:0.##}";
-        }
-
-        /// <summary>int 値を設定する（HP・最大弾数など）</summary>
-        public void Set(int total, int bonus)
-        {
-            if (valueText == null) return;
-            valueText.text = bonus > 0
-                ? $"{total}  <color=#7ED321>(+{bonus})</color>"
-                : $"{total}";
-        }
     }
 }

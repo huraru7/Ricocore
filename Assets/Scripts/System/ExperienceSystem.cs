@@ -7,7 +7,7 @@ using UnityEngine;
 /// 仕組み:
 ///   - 敵が死亡すると EnemyStats.OnEnemyKilled が発火し AddExp() が呼ばれる
 ///   - 必要経験値 = Level * baseExpPerLevel（線形成長）
-///   - 必要量を超えるとレベルアップ。OnLevelUp イベントを発火して LevelUpUI に通知する
+///   - 必要量を超えるとレベルアップ。PlayerState.Level を更新して LevelUpUI に通知する
 /// </summary>
 [RequireComponent(typeof(TankModuleManager))]
 public class ExperienceSystem : MonoBehaviour
@@ -25,13 +25,26 @@ public class ExperienceSystem : MonoBehaviour
     /// <summary>次のレベルアップに必要な経験値</summary>
     public int ExpToNext  => Level * baseExpPerLevel;
 
-    /// <summary>レベルアップ時に発火。引数は新しいレベル値。</summary>
-    public event System.Action<int> OnLevelUp;
+    private PlayerState playerState;
 
     // -------------------------------------------------------
 
+    void Start()
+    {
+        // PlayerSystemHub.Instance は全 Awake 完了後に確実に存在する
+        playerState = PlayerSystemHub.Instance.PlayerStats.State;
+
+        // 初期値をステートに書き込む
+        playerState.Level.Value    = Level;
+        playerState.Exp.Value      = CurrentExp;
+        playerState.ExpToNext.Value = ExpToNext;
+    }
+
+    // EnemyStats への購読は既存のままゲームロジック側で管理
     void OnEnable()  => EnemyStats.OnEnemyKilled += AddExp;
     void OnDisable() => EnemyStats.OnEnemyKilled -= AddExp;
+
+    // -------------------------------------------------------
 
     /// <summary>経験値を加算し、必要に応じてレベルアップ処理を行う。</summary>
     public void AddExp(int amount)
@@ -45,7 +58,11 @@ public class ExperienceSystem : MonoBehaviour
         {
             CurrentExp -= ExpToNext;
             Level++;
-            OnLevelUp?.Invoke(Level);
+            // PlayerState を更新 → LevelUpUI の Subscribe が反応する
+            playerState.Level.Value    = Level;
+            playerState.ExpToNext.Value = ExpToNext; // Level 変化で ExpToNext も変わる
         }
+
+        playerState.Exp.Value = CurrentExp;
     }
 }

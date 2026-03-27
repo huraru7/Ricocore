@@ -1,3 +1,4 @@
+using R3;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -42,7 +43,8 @@ public class ModuleSlotUIConfig
 ///   - アイコン表示（モジュールあり／なしで切り替え）
 ///   - ホバー時に ModuleInfoPanel へモジュール情報を送信
 ///   - クリック時に外部から注入されたコールバックを呼ぶ
-///   - ModuleSlot.OnChanged を購読し、変化時に自動で表示を更新
+///   - ModuleSlot.Changed を Subscribe し、変化時に自動で表示を更新
+///   - モジュール追加時は LitMotion でアイコンポップアニメを再生
 /// </summary>
 public class ModuleSlotUI : MonoBehaviour,
     IPointerEnterHandler,
@@ -86,15 +88,12 @@ public class ModuleSlotUI : MonoBehaviour,
         if (borderImage != null && config.SlotColor != UnityEngine.Color.clear)
             borderImage.color = config.SlotColor;
 
-        // スロットの変化を購読して自動更新（OnChanged は引数なし）
-        slot.OnChanged += Refresh;
-        Refresh();
-    }
+        // R3 で変化を Subscribe — AddTo(this) で MonoBehaviour 破棄時に自動解除
+        slot.Changed
+            .Subscribe(_ => OnSlotChanged())
+            .AddTo(this);
 
-    void OnDestroy()
-    {
-        if (slot != null)
-            slot.OnChanged -= Refresh;
+        Refresh();
     }
 
     // -------------------------------------------------------
@@ -125,6 +124,15 @@ public class ModuleSlotUI : MonoBehaviour,
 
     // -------------------------------------------------------
     // 内部処理
+
+    private void OnSlotChanged()
+    {
+        bool hadModule = iconImage != null && iconImage.enabled && iconImage.sprite != emptySprite;
+        Refresh();
+        // モジュールが新たに追加された時だけポップアニメ
+        if (slot.HasModule && !hadModule && iconImage != null)
+            UIAnimations.Pop(iconImage.transform);
+    }
 
     private void Refresh()
     {

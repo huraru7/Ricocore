@@ -100,3 +100,6 @@ InitTestScene*.unity*
 
 # Unity Package Manager packages (downloaded automatically)
 /Packages/com.unity.inputsystem/
+
+/Packages/nuget-packages/InstalledPackages*
+

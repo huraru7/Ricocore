@@ -363,6 +363,7 @@ GameObject:
   - component: {fileID: 183090475}
   - component: {fileID: 183090474}
   - component: {fileID: 183090476}
+  - component: {fileID: 183090477}
   m_Layer: 0
   m_Name: Tank
   m_TagString: Untagged
@@ -540,6 +541,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: GameRuntime::ExperienceSystem
   baseExpPerLevel: 100
+--- !u!114 &183090477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 183090466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63e89c15670d3ad46ba8a583d0826b1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GameRuntime::PlayerSystemHub
+  ModuleDatabase: {fileID: 0}
 --- !u!1 &221672314
 GameObject:
   m_ObjectHideFlags: 0
@@ -1580,7 +1594,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6459518e2a8503d438cdb78d30e45360, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameRuntime::AmmoUI
-  playerStats: {fileID: 183090472}
   ammoText: {fileID: 802318744}
 --- !u!1 &619394800
 GameObject:
@@ -1716,8 +1729,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 237909844b8a8c8438e4b10885fc9203, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameRuntime::InventoryUI
-  equipSystem: {fileID: 0}
-  infoPanel: {fileID: 0}
   tabButtons:
   - {fileID: 2001174712}
   - {fileID: 63359529}
@@ -2468,9 +2479,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52469990eed074d408093a4454e5c05a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameRuntime::ModuleMenuUI
-  equipSystem: {fileID: 0}
   menuRoot: {fileID: 1183201308}
-  infoPanel: {fileID: 0}
   inventoryUI: {fileID: 641119360}
   slotTurret: {fileID: 0}
   slotEngine: {fileID: 0}
@@ -3182,11 +3191,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50efd583908fdc64a8be84bd2ea4e917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameRuntime::LevelUpUI
-  expSystem: {fileID: 0}
-  moduleManager: {fileID: 0}
-  database: {fileID: 0}
   root: {fileID: 0}
-  levelText: {fileID: 0}
+  levelText: {fileID: 659668323}
   cards: []
 --- !u!1 &1340859411
 GameObject:

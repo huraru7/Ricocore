@@ -1,3 +1,5 @@
+using R3;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +14,9 @@ using UnityEngine.UI;
 ///
 /// EquipSystem / ModuleInfoPanel は PlayerSystemHub.Instance / ModuleInfoPanel.Instance
 /// から自動取得するため SerializeField 設定不要。
+///
+/// Observable.Merge で全スロットを一元購読するため、
+/// initialized フラグ・OnEnable/OnDisable 購読管理が不要になっている。
 ///
 /// シーン構成:
 ///   Inventory (このコンポーネントをアタッチ)
@@ -38,7 +43,6 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private ModuleSlotUI[] slotUIs;
 
     private SlotType activeFilter = SlotType.None;
-    private bool     initialized;
 
     // -------------------------------------------------------
 
@@ -46,18 +50,27 @@ public class InventoryUI : MonoBehaviour
     {
         InitializeSlots();
         InitializeTabs();
-        SubscribeEvents();
-        initialized = true;
+
+        var eq = PlayerSystemHub.Instance.EquipSystem;
+
+        // 全スロット（インベントリ + 部位）の変化を1ストリームに統合して購読
+        // AddTo(this) で MonoBehaviour 破棄時に自動解除 — 手動の Subscribe/Unsubscribe 不要
+        var allChanged = eq.InventorySlots
+            .Concat(eq.PartSlots.Cast<ModuleSlot>())
+            .Select(s => s.Changed)
+            .ToArray();
+
+        Observable.Merge(allChanged)
+            .Subscribe(_ => RefreshDisplay())
+            .AddTo(this);
+
+        RefreshDisplay();
     }
 
     void OnEnable()
     {
-        if (initialized) SubscribeEvents();
-    }
-
-    void OnDisable()
-    {
-        if (initialized) UnsubscribeEvents();
+        // パネルが再表示された時に最新状態に同期
+        if (PlayerSystemHub.Instance != null) RefreshDisplay();
     }
 
     // -------------------------------------------------------
@@ -71,21 +84,6 @@ public class InventoryUI : MonoBehaviour
 
     // -------------------------------------------------------
     // 内部処理
-
-    private void SubscribeEvents()
-    {
-        var eq = PlayerSystemHub.Instance.EquipSystem;
-        foreach (var ps in eq.PartSlots)       ps.OnChanged  += RefreshDisplay;
-        foreach (var inv in eq.InventorySlots)  inv.OnChanged += RefreshDisplay;
-    }
-
-    private void UnsubscribeEvents()
-    {
-        if (PlayerSystemHub.Instance == null) return;
-        var eq = PlayerSystemHub.Instance.EquipSystem;
-        foreach (var ps in eq.PartSlots)       ps.OnChanged  -= RefreshDisplay;
-        foreach (var inv in eq.InventorySlots)  inv.OnChanged -= RefreshDisplay;
-    }
 
     private void InitializeSlots()
     {
