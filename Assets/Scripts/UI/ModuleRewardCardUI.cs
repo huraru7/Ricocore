@@ -40,8 +40,11 @@ public class ModuleRewardCardUI : MonoBehaviour
         if (statsText != null)      statsText.text       = BuildStatsText(def.GetTotalStatBonus());
         if (descriptionText != null) descriptionText.text = def.description;
 
-        selectButton.onClick.RemoveAllListeners();
-        selectButton.onClick.AddListener(() => onSelect(def));
+        if (selectButton != null)
+        {
+            selectButton.onClick.RemoveAllListeners();
+            selectButton.onClick.AddListener(() => onSelect(def));
+        }
     }
 
     // -------------------------------------------------------
