@@ -2491,7 +2491,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f54f5d96ebc4f14db62fb97f6a71c18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GameRuntime::ModuleRewardCardUI
-  iconImage: {fileID: 0}
+  iconImage: {fileID: 1183201311}
   nameText: {fileID: 0}
   slotsText: {fileID: 0}
   statsText: {fileID: 0}
