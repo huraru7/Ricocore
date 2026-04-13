@@ -1,0 +1,281 @@
+/* ============================================================
+   Common.uss  —  プロジェクト共通スタイル
+   UI Toolkit 移行の基盤となるスタイルシート。
+   各 UXML から @import または StyleSheet 参照で使用する。
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   カラー変数（:root で定義してプロジェクト全体で使い回す）
+   ------------------------------------------------------------ */
+:root {
+    --color-bg-panel:        rgba(20, 20, 20, 0.92);
+    --color-bg-slot:         rgba(35, 35, 35, 1);
+    --color-border-default:  rgb(80, 80, 80);
+    --color-border-hover:    rgb(200, 200, 200);
+    --color-text-primary:    rgb(230, 230, 230);
+    --color-text-secondary:  rgb(160, 160, 160);
+    --color-text-bonus:      rgb(126, 211, 33);
+    --color-tab-active-bg:   rgb(255, 255, 255);
+    --color-tab-active-text: rgb(20, 20, 20);
+    --color-tab-inactive-bg: rgb(80, 80, 80);
+    --color-button-bg:       rgb(60, 120, 200);
+    --color-button-hover:    rgb(80, 150, 240);
+    --color-slot-turret:     rgb(200, 80, 80);
+    --color-slot-engine:     rgb(80, 200, 80);
+    --color-slot-right:      rgb(80, 80, 200);
+    --color-slot-left:       rgb(200, 160, 80);
+}
+
+/* ------------------------------------------------------------
+   パネル共通
+   ------------------------------------------------------------ */
+.panel {
+    background-color: var(--color-bg-panel);
+    border-radius: 8px;
+    padding: 12px;
+    border-width: 1px;
+    border-color: var(--color-border-default);
+}
+
+/* ------------------------------------------------------------
+   スロット（ModuleSlotUI）
+   ------------------------------------------------------------ */
+.slot {
+    width: 64px;
+    height: 64px;
+    border-width: 2px;
+    border-color: var(--color-border-default);
+    border-radius: 4px;
+    background-color: var(--color-bg-slot);
+    align-items: center;
+    justify-content: center;
+    transition-property: border-color, background-color;
+    transition-duration: 0.1s;
+}
+
+.slot:hover {
+    border-color: var(--color-border-hover);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.slot__icon {
+    width: 48px;
+    height: 48px;
+}
+
+.slot__label {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    position: absolute;
+    bottom: 2px;
+    left: 4px;
+}
+
+/* スロット枠の色分け（SlotType 別） */
+.slot--turret  { border-color: var(--color-slot-turret); }
+.slot--engine  { border-color: var(--color-slot-engine); }
+.slot--right   { border-color: var(--color-slot-right); }
+.slot--left    { border-color: var(--color-slot-left); }
+
+/* ------------------------------------------------------------
+   タブバー（InventoryUI）
+   ------------------------------------------------------------ */
+.tab-bar {
+    flex-direction: row;
+    margin-bottom: 8px;
+}
+
+.tab {
+    flex: 1;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    background-color: var(--color-tab-inactive-bg);
+    border-radius: 4px;
+    margin-right: 4px;
+    color: var(--color-text-primary);
+    -unity-text-align: middle-center;
+    font-size: 12px;
+    transition-property: background-color, color;
+    transition-duration: 0.1s;
+}
+
+.tab--active {
+    background-color: var(--color-tab-active-bg);
+    color: var(--color-tab-active-text);
+}
+
+/* ------------------------------------------------------------
+   モジュールカード（ModuleRewardCardUI）
+   ------------------------------------------------------------ */
+.card {
+    width: 200px;
+    background-color: var(--color-bg-panel);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: var(--color-border-default);
+    padding: 12px;
+    margin: 8px;
+    align-items: center;
+    transition-property: border-color, scale;
+    transition-duration: 0.15s;
+}
+
+.card:hover {
+    border-color: var(--color-border-hover);
+}
+
+.card__icon {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 8px;
+}
+
+.card__name {
+    font-size: 15px;
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
+}
+
+.card__slots {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
+    white-space: normal;
+}
+
+.card__stats {
+    font-size: 12px;
+    color: var(--color-text-primary);
+    -unity-text-align: middle-left;
+    margin-bottom: 6px;
+    white-space: normal;
+}
+
+.card__desc {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-bottom: 8px;
+}
+
+.card__button {
+    background-color: var(--color-button-bg);
+    color: var(--color-text-primary);
+    border-radius: 4px;
+    padding: 6px 16px;
+    border-width: 0;
+    font-size: 13px;
+    transition-property: background-color;
+    transition-duration: 0.1s;
+}
+
+.card__button:hover {
+    background-color: var(--color-button-hover);
+}
+
+/* ------------------------------------------------------------
+   モジュール情報パネル（ModuleInfoPanel）
+   ------------------------------------------------------------ */
+.info-panel {
+    width: 260px;
+    background-color: var(--color-bg-panel);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: var(--color-border-default);
+    padding: 14px;
+}
+
+.info-panel__header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.info-panel__icon {
+    width: 48px;
+    height: 48px;
+    margin-right: 10px;
+}
+
+.info-panel__name {
+    font-size: 15px;
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+    flex: 1;
+    white-space: normal;
+}
+
+.info-panel__desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    white-space: normal;
+    margin-bottom: 8px;
+}
+
+.info-panel__stats {
+    font-size: 12px;
+    color: var(--color-text-primary);
+    white-space: normal;
+    margin-bottom: 6px;
+}
+
+.info-panel__slots {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    white-space: normal;
+    margin-bottom: 10px;
+}
+
+.info-panel__action-button {
+    background-color: var(--color-button-bg);
+    color: var(--color-text-primary);
+    border-radius: 4px;
+    padding: 6px 0;
+    border-width: 0;
+    font-size: 13px;
+    align-self: stretch;
+    -unity-text-align: middle-center;
+    transition-property: background-color;
+    transition-duration: 0.1s;
+}
+
+.info-panel__action-button:hover {
+    background-color: var(--color-button-hover);
+}
+
+/* ------------------------------------------------------------
+   ボーナス表示（TankStatsPanel）
+   ------------------------------------------------------------ */
+.stat-bonus {
+    color: var(--color-text-bonus);
+}
+
+/* ------------------------------------------------------------
+   レベルアップパネル（LevelUpUI）
+   ------------------------------------------------------------ */
+.levelup-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.levelup-panel__title {
+    font-size: 28px;
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 24px;
+}
+
+.levelup-panel__cards {
+    flex-direction: row;
+}

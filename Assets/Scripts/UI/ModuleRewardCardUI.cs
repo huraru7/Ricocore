@@ -1,49 +1,72 @@
 using System.Text;
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 /// <summary>
-/// レベルアップ選択画面のカード1枚分のUI。
-/// LevelUpUI が Initialize() を呼んでモジュール情報とコールバックをセットする。
+/// レベルアップ選択画面のカード 1 枚分のコントローラ（UI Toolkit 版）。
+/// LevelUpUI が VisualTreeAsset.CloneTree() でインスタンスを作り、
+/// このクラスのコンストラクタに渡して使う。
 ///
-/// シーン構成（このコンポーネントをアタッチした GameObject 内に以下を配置）:
-///   Card
-///   ├── IconImage    (Image)
-///   ├── NameText     (TextMeshProUGUI)
-///   ├── SlotsText    (TextMeshProUGUI)  ← 装着可能部位
-///   ├── StatsText    (TextMeshProUGUI)  ← ステータスボーナス一覧
-///   ├── DescText     (TextMeshProUGUI)
-///   └── SelectButton (Button)
+/// UXML: Assets/UI/UXML/ModuleRewardCard.uxml
+/// USS:  Assets/UI/USS/Common.uss  (.card / .card__* クラス)
+///
+/// uGUI 版との主な違い:
+///   MonoBehaviour ではなく plain class — GameObject / Prefab 不要
+///   SerializeField 配線 → コンストラクタで Q<T>() 取得
+///   Image iconImage → VisualElement "icon-image" (background-image)
+///   Button.onClick  → Button.clicked
 /// </summary>
-public class ModuleRewardCardUI : MonoBehaviour
+public class ModuleRewardCardUI
 {
-    [Header("UI 部品")]
-    [SerializeField] private Image           iconImage;
-    [SerializeField] private TextMeshProUGUI nameText;
-    [SerializeField] private TextMeshProUGUI slotsText;
-    [SerializeField] private TextMeshProUGUI statsText;
-    [SerializeField] private TextMeshProUGUI descriptionText;
-    [SerializeField] private Button          selectButton;
+    // ---- VisualElement 参照 ----
+    public readonly VisualElement Root;   // LevelUpUI がコンテナに追加する対象
+
+    private readonly VisualElement iconImage;
+    private readonly Label         nameText;
+    private readonly Label         slotsText;
+    private readonly Label         statsText;
+    private readonly Label         descriptionText;
+    private readonly Button        selectButton;
+
+    // clicked コールバック管理（-= で解除するためフィールドで保持）
+    private System.Action _onSelectClicked;
 
     // -------------------------------------------------------
 
     /// <summary>
-    /// カードにモジュール情報をセットする。
-    /// onSelect: このカードが選ばれたときのコールバック
+    /// CloneTree() で生成した VisualElement を受け取り、子要素を取得する。
+    /// </summary>
+    public ModuleRewardCardUI(VisualElement cardRoot)
+    {
+        Root = cardRoot;
+
+        iconImage       = cardRoot.Q<VisualElement>("icon-image");
+        nameText        = cardRoot.Q<Label>("name-text");
+        slotsText       = cardRoot.Q<Label>("slots-text");
+        statsText       = cardRoot.Q<Label>("stats-text");
+        descriptionText = cardRoot.Q<Label>("desc-text");
+        selectButton    = cardRoot.Q<Button>("select-button");
+    }
+
+    // -------------------------------------------------------
+
+    /// <summary>
+    /// カードにモジュール情報をセットし、選択コールバックを登録する。
     /// </summary>
     public void Initialize(ModuleDefinition def, System.Action<ModuleDefinition> onSelect)
     {
-        if (iconImage != null)      iconImage.sprite    = def.icon;
-        if (nameText != null)       nameText.text        = def.moduleName;
-        if (slotsText != null)      slotsText.text       = BuildSlotsText(def.compatibleSlots);
-        if (statsText != null)      statsText.text       = BuildStatsText(def.GetTotalStatBonus());
+        if (iconImage != null && def.icon != null)
+            iconImage.style.backgroundImage = new StyleBackground(def.icon);
+
+        if (nameText != null)        nameText.text        = def.moduleName;
+        if (slotsText != null)       slotsText.text       = BuildSlotsText(def.compatibleSlots);
+        if (statsText != null)       statsText.text       = BuildStatsText(def.GetTotalStatBonus());
         if (descriptionText != null) descriptionText.text = def.description;
 
         if (selectButton != null)
         {
-            selectButton.onClick.RemoveAllListeners();
-            selectButton.onClick.AddListener(() => onSelect(def));
+            selectButton.clicked -= _onSelectClicked;
+            _onSelectClicked = () => onSelect(def);
+            selectButton.clicked += _onSelectClicked;
         }
     }
 

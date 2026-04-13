@@ -1,10 +1,12 @@
 using R3;
-using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 /// <summary>
-/// レベルアップ時に 3 択のモジュール選択画面を表示するコントローラ。
-/// Canvas 直下にアタッチすること（常にアクティブな親に置く必要がある）。
+/// レベルアップ時に 3 択のモジュール選択画面を表示するコントローラ（UI Toolkit 版）。
+///
+/// UXML: Assets/UI/UXML/LevelUpPanel.uxml
+/// USS:  Assets/UI/USS/Common.uss  (.levelup-panel / .levelup-panel__* クラス)
 ///
 /// PlayerState.Level を Subscribe し、レベルアップ時にパネルを表示する。
 /// LitMotion でパネル出現アニメを再生（Time.timeScale = 0 に対応）。
@@ -13,33 +15,51 @@ using UnityEngine;
 ///   1. PlayerState.Level が更新される（ExperienceSystem が書き込む）
 ///   2. .Skip(1) で初期値（Lv.1）をスキップ
 ///   3. ModuleDatabase.GetRandom(3) でランダムな選択肢を取得
-///   4. 3 枚のカードに情報をセットして root パネルを表示
-///   5. Time.timeScale = 0（ゲームを一時停止）、LitMotion でポップイン
+///   4. VisualTreeAsset からカードを 3 枚複製してコンテナに追加
+///   5. Time.timeScale = 0、UIToolkitAnimations でポップイン
 ///   6. プレイヤーがカードを選択
 ///   7. TankModuleManager.AcquireModule() でインベントリに追加
-///   8. パネルを非表示にして Time.timeScale = 1（ゲーム再開）
+///   8. パネルを非表示にして Time.timeScale = 1
 ///
-/// シーン構成:
-///   Canvas（LevelUpUI をアタッチ）
-///   └── LevelUpPanel  ← root にドラッグ
-///       ├── LevelText (TextMeshProUGUI) ← levelText にドラッグ
-///       └── CardContainer
-///           ├── Card_0 (ModuleRewardCardUI) ← cards[0]
-///           ├── Card_1 (ModuleRewardCardUI) ← cards[1]
-///           └── Card_2 (ModuleRewardCardUI) ← cards[2]
+/// uGUI 版との主な違い:
+///   [SerializeField] GameObject root     → UIDocument + Q("levelup-root")
+///   [SerializeField] ModuleRewardCardUI[] cards → VisualTreeAsset を CloneTree() で動的生成
+///   root.SetActive()                     → panel.style.display
+///   UIAnimations.PanelOpen(root.transform) → UIToolkitAnimations.PanelOpen(panel)
 /// </summary>
+[RequireComponent(typeof(UIDocument))]
 public class LevelUpUI : MonoBehaviour
 {
-    [Header("UI")]
-    [SerializeField] private GameObject           root;
-    [SerializeField] private TextMeshProUGUI      levelText;
-    [SerializeField] private ModuleRewardCardUI[] cards;
+    [Header("カードのテンプレート（ModuleRewardCard.uxml を設定）")]
+    [SerializeField] private VisualTreeAsset cardTemplate;
+
+    // ---- VisualElement 参照 ----
+    private VisualElement panel;
+    private Label         levelText;
+    private VisualElement cardContainer;
+
+    // 生成したカードコントローラを再利用するためのキャッシュ
+    private readonly ModuleRewardCardUI[] cards = new ModuleRewardCardUI[3];
 
     // -------------------------------------------------------
 
     void Awake()
     {
-        root.SetActive(false);
+        var root = GetComponent<UIDocument>().rootVisualElement;
+
+        panel         = root.Q<VisualElement>("levelup-root");
+        levelText     = root.Q<Label>("level-text");
+        cardContainer = root.Q<VisualElement>("card-container");
+
+        // カードを事前に 3 枚生成してコンテナに追加しておく
+        for (int i = 0; i < cards.Length; i++)
+        {
+            var instance = cardTemplate.CloneTree();
+            cardContainer.Add(instance);
+            cards[i] = new ModuleRewardCardUI(instance);
+        }
+
+        Hide();
     }
 
     void Start()
@@ -48,7 +68,6 @@ public class LevelUpUI : MonoBehaviour
             .Skip(1)  // 初期値（Lv.1）をスキップ。変化した時だけ反応する
             .Subscribe(ShowLevelUp)
             .AddTo(this);
-        // AddTo(this) で OnDestroy 時に自動解除 — 手動購読解除不要
     }
 
     // -------------------------------------------------------
@@ -70,23 +89,26 @@ public class LevelUpUI : MonoBehaviour
         int n = Mathf.Min(cards.Length, choices.Length);
         for (int i = 0; i < n; i++)
         {
-            cards[i].gameObject.SetActive(true);
+            cards[i].Root.style.display = DisplayStyle.Flex;
             cards[i].Initialize(choices[i], OnCardSelected);
         }
+        // 選択肢が 3 未満の場合は余ったカードを非表示
         for (int i = n; i < cards.Length; i++)
-            cards[i].gameObject.SetActive(false);
+            cards[i].Root.style.display = DisplayStyle.None;
 
-        root.SetActive(true);
+        panel.style.display = DisplayStyle.Flex;
         Time.timeScale = 0f;
 
         // timeScale = 0 のままでも動作するパネル出現アニメ
-        UIAnimations.PanelOpen(root.transform);
+        UIToolkitAnimations.PanelOpen(panel);
     }
 
     private void OnCardSelected(ModuleDefinition def)
     {
         PlayerSystemHub.Instance.ModuleManager.AcquireModule(def);
-        root.SetActive(false);
+        Hide();
         Time.timeScale = 1f;
     }
+
+    private void Hide() => panel.style.display = DisplayStyle.None;
 }

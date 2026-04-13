@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: GameRuntime::ModuleDefinition
   moduleName: null
   description: 
-  icon: {fileID: 0}
-  compatibleSlots: 
+  icon: {fileID: -1605208410070763937, guid: 60793865698d87541951d950bf2863ba, type: 3}
+  compatibleSlots: 01000000
   statBonus:
     moveSpeed: 1
     turnSpeed: 0
