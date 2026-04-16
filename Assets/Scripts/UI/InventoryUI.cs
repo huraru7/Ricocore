@@ -1,10 +1,13 @@
 using R3;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 /// <summary>
-/// Inventory セクションのコントローラ。
+/// Inventory セクションのコントローラ（UI Toolkit 版）。
+///
+/// UXML: Assets/UI/UXML/Inventory.uxml
+/// USS:  Assets/UI/USS/Common.uss
 ///
 /// 責務:
 ///   - EquipSystem のインベントリスロットを ModuleSlotUI と 1:1 で初期化する
@@ -12,39 +15,52 @@ using UnityEngine.UI;
 ///   - フィルタ変更やモジュール変化に応じて表示/非表示を更新する
 ///   - ModuleMenuUI から ResetFilter() を受け取って ALL タブに戻す
 ///
-/// EquipSystem / ModuleInfoPanel は PlayerSystemHub.Instance / ModuleInfoPanel.Instance
-/// から自動取得するため SerializeField 設定不要。
-///
-/// Observable.Merge で全スロットを一元購読するため、
-/// initialized フラグ・OnEnable/OnDisable 購読管理が不要になっている。
-///
-/// シーン構成:
-///   Inventory (このコンポーネントをアタッチ)
-///   ├── TabBar
-///   │   ├── Tab_All    (Button)
-///   │   ├── Tab_Turret (Button)
-///   │   ├── Tab_Engine (Button)
-///   │   ├── Tab_Right  (Button)
-///   │   └── Tab_Left   (Button)
-///   └── SlotContainer  (GridLayoutGroup 推奨)
-///       ├── SlotUI_0   (ModuleSlotUI)
-///       ...
-///       └── SlotUI_9
+/// uGUI 版との主な違い:
+///   [SerializeField] Button[] tabButtons → UXML から Q<Button> で取得
+///   [SerializeField] ModuleSlotUI[] slotUIs → CloneTree() で動的生成
+///   Image.color でタブ色変更 → EnableInClassList("tab--active") で切り替え
+///   slotUIs[i].gameObject.SetActive → slot.Root.style.display
 /// </summary>
+[RequireComponent(typeof(UIDocument))]
 public class InventoryUI : MonoBehaviour
 {
-    [Header("タブ（ALL から順に設定）")]
-    [SerializeField] private Button[]   tabButtons;   // ALL / 砲塔 / エンジン / 右 / 左
-    [SerializeField] private SlotType[] tabSlots;     // None / Turret / Engine / Right / Left
-    [SerializeField] private Color      tabActiveColor   = Color.white;
-    [SerializeField] private Color      tabInactiveColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+    [Header("スロットテンプレート（ModuleSlot.uxml を設定）")]
+    [SerializeField] private VisualTreeAsset slotTemplate;
 
-    [Header("インベントリスロット UI（EquipSystem の inventorySize と同数）")]
-    [SerializeField] private ModuleSlotUI[] slotUIs;
+    // ---- VisualElement 参照 ----
+    private Button[]        tabButtons;   // ALL / 砲塔 / エンジン / 右 / 左
+    private VisualElement   slotContainer;
 
+    // タブに対応する SlotType（tabButtons と同じ順）
+    private static readonly SlotType[] TabSlots =
+    {
+        SlotType.None,
+        SlotType.Turret,
+        SlotType.Engine,
+        SlotType.RightCaterpillar,
+        SlotType.LeftCaterpillar,
+    };
+
+    private ModuleSlotUI[] slotUIs;
     private SlotType activeFilter = SlotType.None;
 
     // -------------------------------------------------------
+
+    void Awake()
+    {
+        var root = GetComponent<UIDocument>().rootVisualElement;
+
+        tabButtons = new Button[]
+        {
+            root.Q<Button>("tab-all"),
+            root.Q<Button>("tab-turret"),
+            root.Q<Button>("tab-engine"),
+            root.Q<Button>("tab-right"),
+            root.Q<Button>("tab-left"),
+        };
+
+        slotContainer = root.Q<VisualElement>("slot-container");
+    }
 
     void Start()
     {
@@ -54,7 +70,6 @@ public class InventoryUI : MonoBehaviour
         var eq = PlayerSystemHub.Instance.EquipSystem;
 
         // 全スロット（インベントリ + 部位）の変化を1ストリームに統合して購読
-        // AddTo(this) で MonoBehaviour 破棄時に自動解除 — 手動の Subscribe/Unsubscribe 不要
         var allChanged = eq.InventorySlots
             .Concat(eq.PartSlots.Cast<ModuleSlot>())
             .Select(s => s.Changed)
@@ -69,17 +84,13 @@ public class InventoryUI : MonoBehaviour
 
     void OnEnable()
     {
-        // パネルが再表示された時に最新状態に同期
         if (PlayerSystemHub.Instance != null) RefreshDisplay();
     }
 
     // -------------------------------------------------------
     // 公開 API
 
-    /// <summary>
-    /// ModuleMenuUI から呼び出してフィルタを ALL に戻す。
-    /// メニューを開いたタイミングで呼ぶことを想定している。
-    /// </summary>
+    /// <summary>ModuleMenuUI から呼び出してフィルタを ALL に戻す。</summary>
     public void ResetFilter() => SetFilter(SlotType.None);
 
     // -------------------------------------------------------
@@ -87,76 +98,72 @@ public class InventoryUI : MonoBehaviour
 
     private void InitializeSlots()
     {
-        var eq = PlayerSystemHub.Instance.EquipSystem;
+        var eq    = PlayerSystemHub.Instance.EquipSystem;
+        int count = eq.InventorySlots.Length;
 
-        int count = Mathf.Min(slotUIs.Length, eq.InventorySlots.Length);
-
-        if (slotUIs.Length != eq.InventorySlots.Length)
-            Debug.LogWarning($"[InventoryUI] SlotUI 数 ({slotUIs.Length}) と InventorySlots 数 ({eq.InventorySlots.Length}) が異なります。");
+        slotUIs = new ModuleSlotUI[count];
 
         for (int i = 0; i < count; i++)
         {
-            var config = new ModuleSlotUIConfig
+            var instance = slotTemplate.CloneTree();
+            slotContainer.Add(instance);
+            slotUIs[i] = new ModuleSlotUI(instance);
+
+            slotUIs[i].Initialize(new ModuleSlotUIConfig
             {
                 Slot              = eq.InventorySlots[i],
                 InfoPanel         = ModuleInfoPanel.Instance,
                 OnClick           = slot => eq.TryEquip(slot),
                 Label             = (i + 1).ToString(),
                 ActionButtonLabel = "装着",
-                SlotColor         = Color.clear
-            };
-            slotUIs[i].Initialize(config);
+                SlotColor         = Color.clear,
+            });
         }
     }
 
     private void InitializeTabs()
     {
-        if (tabButtons == null || tabSlots == null) return;
-
-        int n = Mathf.Min(tabButtons.Length, tabSlots.Length);
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < tabButtons.Length; i++)
         {
-            var ts = tabSlots[i]; // ラムダキャプチャ用にローカル変数化
-            tabButtons[i].onClick.AddListener(() => SetFilter(ts));
+            if (tabButtons[i] == null) continue;
+            var ts = TabSlots[i]; // ラムダキャプチャ用
+            tabButtons[i].clicked += () => SetFilter(ts);
         }
 
-        UpdateTabColors();
+        UpdateTabStyles();
     }
 
     private void SetFilter(SlotType filter)
     {
         activeFilter = filter;
-
-        if (ModuleInfoPanel.Instance != null)
-            ModuleInfoPanel.Instance.Hide();
-
+        ModuleInfoPanel.Instance?.Hide();
         RefreshDisplay();
-        UpdateTabColors();
+        UpdateTabStyles();
     }
 
     private void RefreshDisplay()
     {
+        if (slotUIs == null) return;
+
         var eq = PlayerSystemHub.Instance.EquipSystem;
         int count = Mathf.Min(slotUIs.Length, eq.InventorySlots.Length);
+
         for (int i = 0; i < count; i++)
         {
-            var slot  = eq.InventorySlots[i];
+            var slot = eq.InventorySlots[i];
             bool show = activeFilter == SlotType.None
                      || (slot.HasModule && slot.Module.IsCompatible(activeFilter));
-            slotUIs[i].gameObject.SetActive(show);
+
+            slotUIs[i].Root.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
         }
     }
 
-    private void UpdateTabColors()
+    private void UpdateTabStyles()
     {
-        if (tabButtons == null || tabSlots == null) return;
-
-        int n = Mathf.Min(tabButtons.Length, tabSlots.Length);
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < tabButtons.Length; i++)
         {
-            var img = tabButtons[i].GetComponent<Image>();
-            if (img != null)
-                img.color = tabSlots[i] == activeFilter ? tabActiveColor : tabInactiveColor;
+            if (tabButtons[i] == null) continue;
+            tabButtons[i].EnableInClassList("tab--active", TabSlots[i] == activeFilter);
         }
     }
 }
