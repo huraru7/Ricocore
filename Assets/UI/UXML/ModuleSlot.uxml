@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="../USS/Common.uss" />
+
+    <ui:VisualElement class="slot" name="slot-root">
+
+        <!-- モジュールアイコン（background-image で Sprite を表示） -->
+        <ui:VisualElement name="slot-icon" class="slot__icon" />
+
+        <!-- スロット番号 or 部位名ラベル（任意） -->
+        <ui:Label name="slot-label" class="slot__label" text="" />
+
+    </ui:VisualElement>
+
+</ui:UXML>
