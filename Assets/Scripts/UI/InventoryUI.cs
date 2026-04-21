@@ -90,6 +90,13 @@ public class InventoryUI : MonoBehaviour
     // -------------------------------------------------------
     // 公開 API
 
+    /// <summary>ModuleMenuUI から呼び出してパネルの表示/非表示を切り替える。</summary>
+    public void SetVisible(bool visible)
+    {
+        var root = GetComponent<UIDocument>().rootVisualElement;
+        root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
     /// <summary>ModuleMenuUI から呼び出してフィルタを ALL に戻す。</summary>
     public void ResetFilter() => SetFilter(SlotType.None);
 

@@ -263,6 +263,34 @@
 }
 
 /* ------------------------------------------------------------
+   モジュールメニュー全体（ModuleMenuUI）
+   ------------------------------------------------------------ */
+
+/* 画面全体を覆うオーバーレイ（左：部位スロット、右：Inventory UIDocument） */
+.module-menu {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* 部位スロット列（左カラム） */
+.part-slots {
+    flex-direction: column;
+    margin-right: 20px;
+}
+
+/* 各部位スロットのラベル付きラッパー */
+.part-slot-wrap {
+    margin-bottom: 10px;
+}
+
+/* ------------------------------------------------------------
    ボーナス表示（TankStatsPanel）
    ------------------------------------------------------------ */
 .stat-bonus {

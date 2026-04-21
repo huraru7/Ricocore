@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="../USS/Common.uss" />
+
+    <!-- メニュー全体ルート（Eキーで表示/非表示） -->
+    <ui:VisualElement name="menu-root" class="module-menu">
+
+        <!-- 部位スロット欄（左カラム）ModuleSlot.uxml を CloneTree() で追加 -->
+        <ui:VisualElement name="part-slots" class="part-slots">
+            <ui:VisualElement name="slot-turret-wrap"  class="part-slot-wrap" />
+            <ui:VisualElement name="slot-engine-wrap"  class="part-slot-wrap" />
+            <ui:VisualElement name="slot-right-wrap"   class="part-slot-wrap" />
+            <ui:VisualElement name="slot-left-wrap"    class="part-slot-wrap" />
+        </ui:VisualElement>
+
+        <!-- Inventory は別 UIDocument のため UXML 上は空（右側に配置） -->
+
+    </ui:VisualElement>
+
+</ui:UXML>
