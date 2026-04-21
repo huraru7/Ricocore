@@ -21,8 +21,9 @@ using UnityEngine.UIElements;
 [RequireComponent(typeof(UIDocument))]
 public class ModuleMenuUI : MonoBehaviour
 {
-    [Header("インベントリ（別 UIDocument）")]
-    [SerializeField] private InventoryUI inventoryUI;
+    [Header("連動パネル（別 UIDocument）")]
+    [SerializeField] private InventoryUI    inventoryUI;
+    [SerializeField] private TankStatsPanel tankStatsPanel;
 
     [Header("スロットテンプレート（ModuleSlot.uxml を設定）")]
     [SerializeField] private VisualTreeAsset slotTemplate;
@@ -91,6 +92,7 @@ public class ModuleMenuUI : MonoBehaviour
         isOpen = !isOpen;
         panel.style.display = isOpen ? DisplayStyle.Flex : DisplayStyle.None;
         inventoryUI?.SetVisible(isOpen);
+        tankStatsPanel?.SetVisible(isOpen);
 
         if (isOpen)
             inventoryUI?.ResetFilter();

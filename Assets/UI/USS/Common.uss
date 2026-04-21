@@ -291,10 +291,40 @@
 }
 
 /* ------------------------------------------------------------
-   ボーナス表示（TankStatsPanel）
+   ステータスパネル（TankStatsPanel）
    ------------------------------------------------------------ */
-.stat-bonus {
+.stats-panel {
+    min-width: 220px;
+}
+
+.stat-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.stat-row__name {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    width: 110px;
+}
+
+.stat-row__values {
+    flex-direction: row;
+    align-items: center;
+}
+
+.stat-row__value {
+    font-size: 16px;
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+}
+
+/* ボーナス値（緑色、ボーナスなし時は display: none） */
+.stat-row__bonus {
+    font-size: 14px;
     color: var(--color-text-bonus);
+    margin-left: 6px;
 }
 
 /* ------------------------------------------------------------
