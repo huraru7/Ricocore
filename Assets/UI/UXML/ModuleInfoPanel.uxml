@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="../USS/Common.uss" />
+
+    <ui:VisualElement class="info-panel" name="info-panel-root">
+
+        <!-- ヘッダー：アイコン + モジュール名 -->
+        <ui:VisualElement class="info-panel__header">
+            <ui:VisualElement name="icon-image" class="info-panel__icon" />
+            <ui:Label name="name-text" class="info-panel__name" text="Module Name" />
+        </ui:VisualElement>
+
+        <!-- 説明文 -->
+        <ui:Label name="desc-text" class="info-panel__desc" text="" />
+
+        <!-- ステータスボーナス -->
+        <ui:Label name="stats-text" class="info-panel__stats" text="" />
+
+        <!-- 装着可能スロット -->
+        <ui:Label name="slots-text" class="info-panel__slots" text="" />
+
+        <!-- アクションボタン（装着 / 取り外し） -->
+        <ui:Button name="action-button" class="info-panel__action-button" text="装着" />
+
+    </ui:VisualElement>
+
+</ui:UXML>

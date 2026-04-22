@@ -1,19 +1,32 @@
 using UnityEngine;
 
+/// <summary>
+/// フィールドに配置されたモジュールアイテム。
+/// プレイヤーが触れると TankModuleManager.AcquireModule() を呼び、
+/// ModuleDefinition (元データ) から新しい Module インスタンスを生成してインベントリへ追加する。
+/// </summary>
 [RequireComponent(typeof(Collider2D))]
 public class ModulePickup : MonoBehaviour
 {
-    // TODO: 将来的にモジュールの種類・効果を定義する
-    // [SerializeField] private ModuleDefinition moduleData;
+    [SerializeField] private ModuleDefinition moduleData;
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.TryGetComponent<PlayerStats>(out _)) return;
+        if (!other.TryGetComponent<TankModuleManager>(out var manager)) return;
 
-        // TODO: モジュールシステム実装後に moduleData.bonus を PlayerStats に適用する
-        // 現時点では効果未実装のため Warning を出してアイテムを消す（拾得検出の確認用）
-        Debug.LogWarning($"[ModulePickup] '{gameObject.name}' を拾いましたが、モジュール効果はまだ未実装です。");
+        if (moduleData == null)
+        {
+            Debug.LogWarning($"[ModulePickup] '{gameObject.name}': ModuleDefinition が未設定です。");
+            return;
+        }
 
-        Destroy(gameObject);
+        if (manager.AcquireModule(moduleData))
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Debug.Log($"[ModulePickup] インベントリが満杯のため '{moduleData.moduleName}' を拾えません。");
+        }
     }
 }

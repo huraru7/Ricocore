@@ -18,6 +18,12 @@ public class EnemyStats : MonoBehaviour, IDamageable
         CurrentHp = data.maxHp;
     }
 
+    /// <summary>
+    /// 敵が死亡したとき発火する静的イベント。引数は付与する経験値量。
+    /// ExperienceSystem が購読して経験値を加算する。
+    /// </summary>
+    public static event System.Action<int> OnEnemyKilled;
+
     public void TakeDamage(int amount)
     {
         if (amount <= 0) return;
@@ -27,6 +33,7 @@ public class EnemyStats : MonoBehaviour, IDamageable
 
     private void Die()
     {
+        OnEnemyKilled?.Invoke(data.expReward);
         TryDropModule();
         gameObject.SetActive(false);
     }

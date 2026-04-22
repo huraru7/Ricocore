@@ -21,10 +21,19 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     private float rechargeTimer;
 
+    /// <summary>UI 購読用リアクティブステート。PlayerState.Subscribe() で変化を受け取る。</summary>
+    public PlayerState State { get; } = new();
+
     void Awake()
     {
         CurrentHp   = MaxHp;
         CurrentAmmo = MaxAmmo;
+
+        // 初期値をステートに反映（Subscribe 時に即座に最新値が届くよう）
+        State.CurrentHp.Value   = CurrentHp;
+        State.MaxHp.Value       = MaxHp;
+        State.CurrentAmmo.Value = CurrentAmmo;
+        State.MaxAmmo.Value     = MaxAmmo;
     }
 
     void Update()
@@ -36,6 +45,7 @@ public class PlayerStats : MonoBehaviour, IDamageable
             {
                 CurrentAmmo++;
                 rechargeTimer = 0f;
+                State.CurrentAmmo.Value = CurrentAmmo;
             }
         }
     }
@@ -45,24 +55,40 @@ public class PlayerStats : MonoBehaviour, IDamageable
     {
         if (CurrentAmmo <= 0) return false;
         CurrentAmmo--;
+        State.CurrentAmmo.Value = CurrentAmmo;
         return true;
     }
 
     // モジュールシステムから呼ぶ
-    public void SetModuleBonus(StatBonus bonus) { moduleBonus = bonus; }
+    public void SetModuleBonus(StatBonus bonus)
+    {
+        moduleBonus = bonus;
+        // MaxHp / MaxAmmo はボーナス変化で変わるのでステートを更新
+        State.MaxHp.Value   = MaxHp;
+        State.MaxAmmo.Value = MaxAmmo;
+    }
 
     // スキルツリーから呼ぶ
-    public void SetSkillBonus(StatBonus bonus) { skillBonus = bonus; }
+    public void SetSkillBonus(StatBonus bonus)
+    {
+        skillBonus = bonus;
+        State.MaxHp.Value   = MaxHp;
+        State.MaxAmmo.Value = MaxAmmo;
+    }
 
     public void TakeDamage(int amount)
     {
         if (amount <= 0) return;
         CurrentHp = Mathf.Max(0, CurrentHp - amount);
+        State.CurrentHp.Value = CurrentHp;
         if (CurrentHp <= 0) gameObject.SetActive(false);
     }
 
     public void Heal(int amount)
     {
         CurrentHp = Mathf.Min(MaxHp, CurrentHp + amount);
+        State.CurrentHp.Value = CurrentHp;
     }
+
+    void OnDestroy() => State.Dispose();
 }

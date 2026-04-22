@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+
+    <Style src="../USS/Common.uss" />
+
+    <ui:VisualElement name="inventory-root" class="panel">
+
+        <!-- タブバー -->
+        <ui:VisualElement class="tab-bar">
+            <ui:Button name="tab-all"    class="tab tab--active" text="ALL" />
+            <ui:Button name="tab-turret" class="tab"             text="砲塔" />
+            <ui:Button name="tab-engine" class="tab"             text="エンジン" />
+            <ui:Button name="tab-right"  class="tab"             text="右" />
+            <ui:Button name="tab-left"   class="tab"             text="左" />
+        </ui:VisualElement>
+
+        <!-- スロットコンテナ（ModuleSlot.uxml を CloneTree() で追加） -->
+        <ui:VisualElement name="slot-container" class="slot-container" />
+
+    </ui:VisualElement>
+
+</ui:UXML>
