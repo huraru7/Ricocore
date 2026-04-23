@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 28
-  productGUID: ef6fe5e5042501443a8ba436916be7d7
+  productGUID: f121599132c745f4d99a4882d56b28f5
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: project tank
+  productName: project Tanker
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -604,14 +604,14 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: project tank
+  metroPackageName: project Tanker
   metroPackageVersion: 
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: project tank
+  metroApplicationDescription: project Tanker
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0
@@ -682,10 +682,10 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
-  cloudProjectId: 0750bd88-c82e-41e1-81dc-2390bffbc7af
+  cloudProjectId: 9142212b-ab9f-4903-9936-2d2b155dbcd0
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: project tank
+  projectName: project Tanker
   organizationId: huraru
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
