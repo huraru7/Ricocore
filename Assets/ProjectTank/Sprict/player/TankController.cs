@@ -1,35 +1,30 @@
-using System.Runtime.ExceptionServices;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    //do 動いたときに追従して胴体が少しづつプレイヤーの向きを進行方向に向けていく。
-    //do 
-    [Header("Settings")]
+    [Header("Setting")]
     [SerializeField] private float moveSpeed = 5f;
 
     [Header("Tank")]
     [SerializeField] private GameObject tank;
-    [SerializeField] private GameObject tankBarrel;
+    [SerializeField] private GameObject tankBarret;
     [SerializeField] private GameObject tankBoby;
-
     private Rigidbody2D rb;
-    private Vector2 moveInput;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
     }
 
-    private void Update()
-    {
-        moveInput.x = Input.GetAxisRaw("Horizontal");
-        moveInput.y = Input.GetAxisRaw("Vertical");
-    }
-
     private void FixedUpdate()
     {
-        rb.linearVelocity = moveInput.normalized * moveSpeed;
+        var kb = Keyboard.current;
+        var move = new Vector2(
+            (kb.dKey.isPressed ? 1 : 0) - (kb.aKey.isPressed ? 1 : 0),
+            (kb.wKey.isPressed ? 1 : 0) - (kb.sKey.isPressed ? 1 : 0)
+        );
+        rb.linearVelocity = move.normalized * moveSpeed;
     }
 }
