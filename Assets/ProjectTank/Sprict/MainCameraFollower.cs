@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MainCameraFollower : MonoBehaviour
 {
-    [Header("追従ターゲット")]
+    [Header("Target")]
     [SerializeField] private Transform _pickaxeTarget;
     [SerializeField] private Vector3 _offset = new Vector3(0, 0, -10);
     [SerializeField] private float _smoothSpeed = 5f;
