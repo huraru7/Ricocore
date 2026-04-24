@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -5,7 +6,13 @@ public class PlayerController : MonoBehaviour
 {
     //do 動いたときに追従して胴体が少しづつプレイヤーの向きを進行方向に向けていく。
     //do 
+    [Header("Settings")]
     [SerializeField] private float moveSpeed = 5f;
+
+    [Header("Tank")]
+    [SerializeField] private GameObject tank;
+    [SerializeField] private GameObject tankBarrel;
+    [SerializeField] private GameObject tankBoby;
 
     private Rigidbody2D rb;
     private Vector2 moveInput;
