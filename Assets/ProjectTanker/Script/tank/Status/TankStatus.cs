@@ -1,4 +1,5 @@
 using R3;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TankStatus : MonoBehaviour
@@ -15,6 +16,12 @@ public class TankStatus : MonoBehaviour
 
     void Awake()
     {
+        if (data == null)
+        {
+            Debug.LogError($"TankDataが割り当てられていません。", this);
+            return;
+        }
+
         HP = new ReactiveProperty<int>(data.maxHP);
         maxHP = data.maxHP;
         movementSpeed = new ReactiveProperty<int>(data.movementSpeed);
@@ -24,6 +31,7 @@ public class TankStatus : MonoBehaviour
 
     public void dealDamage(int amount)
     {
+        if (amount <= 0) return;
         HP.Value = Mathf.Clamp(HP.Value - amount, 0, data.maxHP);
     }
 }

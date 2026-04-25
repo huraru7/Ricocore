@@ -4,9 +4,6 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    //do 指定の方向への操作を行った際に、向きを徐々にその向きへをそろえるようにする。
-    //do 
-
     [Header("Setting")]
     [SerializeField] private float moveSpeed = 5f;
 
