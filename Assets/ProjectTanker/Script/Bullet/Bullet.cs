@@ -5,26 +5,27 @@ public class Bullet : MonoBehaviour
 {
     [Tooltip("BulletSetting")]
     [SerializeField] private float speed = 10f;
-
     [SerializeField] private int damage = 1;
-
     private Rigidbody2D _rb;
     private Vector2 _direction;
+    private TankBulletManager _owner;
 
     void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
-        _direction = Vector2.up; // テスト用
-        _rb.linearVelocity = _direction * speed;
     }
 
-    public void Initialize(Vector2 direction)
+    public void Initialize(Vector2 direction, TankBulletManager owner)
     {
+        _owner = owner;
         _direction = direction.normalized;
         _rb.linearVelocity = _direction * speed;
     }
 
-
+    void OnDisable()
+    {
+        _rb.linearVelocity = Vector2.zero;
+    }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
@@ -39,6 +40,7 @@ public class Bullet : MonoBehaviour
         if (collision.gameObject.TryGetComponent<TankBulletManager>(out var bulletManager))
         {
             bulletManager.TakeDamage(damage);
+            if (_owner != null) _owner.ReturnBullet(this);
         }
     }
 }
