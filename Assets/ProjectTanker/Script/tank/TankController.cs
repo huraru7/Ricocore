@@ -33,6 +33,5 @@ public class PlayerController : MonoBehaviour
         }
 
         rb.linearVelocity = transform.up * moveSpeed * (move == Vector2.zero ? 0f : 1f);
-        // rb.linearVelocity = move.normalized * moveSpeed;
     }
 }
