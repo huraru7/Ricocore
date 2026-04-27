@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using R3;
 using UnityEngine;
 
 public class TankBulletManager : MonoBehaviour
@@ -11,8 +12,8 @@ public class TankBulletManager : MonoBehaviour
 
     [Tooltip("Setting")]
     [SerializeField] private GameObject bullet;
-
-    private int totalRounds;
+    [SerializeField] private SerializableReactiveProperty<int> totalRounds;
+    public SerializableReactiveProperty<int> getTotalRounds => totalRounds;
 
     [Tooltip("PoolSize")]
     [SerializeField] private int _poolSize = 5;
@@ -39,14 +40,14 @@ public class TankBulletManager : MonoBehaviour
 
     void Update()
     {
-        if (totalRounds < _tankStatus.magazineCapacity.Value)
+        if (totalRounds.Value < _tankStatus.getMagazineCapacity.Value)
         {
             //リロード処理
             currentTime += Time.deltaTime;
 
             if (currentTime > 5)//!:この5は後々リロード時間のステータスに紐づけるようにする
             {
-
+                totalRounds.Value++;
             }
         }
     }
@@ -71,6 +72,7 @@ public class TankBulletManager : MonoBehaviour
         b.transform.position = transform.position;
         b.gameObject.SetActive(true);
         b.Initialize(direction, this);
+        totalRounds.Value--;
     }
 
     /// <summary>

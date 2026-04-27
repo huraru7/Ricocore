@@ -832,6 +832,7 @@ GameObject:
   - component: {fileID: 781938000}
   - component: {fileID: 781938002}
   - component: {fileID: 781938003}
+  - component: {fileID: 781938004}
   m_Layer: 0
   m_Name: Tank
   m_TagString: Untagged
@@ -911,6 +912,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TankBulletManager
   _tankStatus: {fileID: 781938003}
   bullet: {fileID: 2616927210013429467, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
+  totalRounds:
+    value: 0
   _poolSize: 10
 --- !u!114 &781938003
 MonoBehaviour:
@@ -925,6 +928,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TankStatus
   data: {fileID: 11400000, guid: 839efc758ff9f414aa5dc2d7da7bf181, type: 2}
+  HP:
+    value: 0
+  maxHP:
+    value: 0
+  movementSpeed:
+    value: 0
+  turnRate:
+    value: 0
+  magazineCapacity:
+    value: 0
+--- !u!114 &781938004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 781937997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad317a1b5c0a445ef8c73b933d0f2c63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TankModuleManager
+  moduleLists: []
 --- !u!1 &859758135
 GameObject:
   m_ObjectHideFlags: 0
