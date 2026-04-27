@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f8dfabd60723904bb2550c964d0b07a, type: 3}
   m_Name: TankData
   m_EditorClassIdentifier: Assembly-CSharp::TankData
-  maxHP: 0
-  movementSpeed: 0
-  turnRate: 0
-  magazineCapacity: 0
+  maxHP: 39
+  movementSpeed: 43
+  turnRate: 34
+  magazineCapacity: 61
