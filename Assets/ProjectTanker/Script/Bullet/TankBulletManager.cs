@@ -12,6 +12,8 @@ public class TankBulletManager : MonoBehaviour
     [Tooltip("Setting")]
     [SerializeField] private GameObject bullet;
 
+    private int totalRounds;
+
     [Tooltip("PoolSize")]
     [SerializeField] private int _poolSize = 5;
 
@@ -33,9 +35,20 @@ public class TankBulletManager : MonoBehaviour
         //do:ダメージ演出や効果音はここから呼び出せる。
     }
 
+    private float currentTime = 0f;
+
     void Update()
     {
-        //リロード処理
+        if (totalRounds < _tankStatus.magazineCapacity.Value)
+        {
+            //リロード処理
+            currentTime += Time.deltaTime;
+
+            if (currentTime > 5)//!:この5は後々リロード時間のステータスに紐づけるようにする
+            {
+
+            }
+        }
     }
 
     /// <summary>

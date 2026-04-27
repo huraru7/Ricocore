@@ -15,6 +15,11 @@ public class Bullet : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
     }
 
+    /// <summary>
+    /// 弾を初期化し、指定した方向へ発射する。
+    /// </summary>
+    /// <param name="direction">発射方向</param>
+    /// <param name="owner">この弾を発射したタンクのBulletManager</param>
     public void Initialize(Vector2 direction, TankBulletManager owner)
     {
         _owner = owner;
