@@ -8,7 +8,7 @@ public class TankStatus : MonoBehaviour
 
     [Header("Status")]
     public ReactiveProperty<int> HP { get; private set; }
-    public int maxHP;
+    public ReactiveProperty<int> maxHP { get; private set; }
     public ReactiveProperty<int> movementSpeed { get; private set; }
     public ReactiveProperty<int> turnRate { get; private set; }
     public ReactiveProperty<int> magazineCapacity { get; private set; }
@@ -22,7 +22,7 @@ public class TankStatus : MonoBehaviour
         }
 
         HP = new ReactiveProperty<int>(data.maxHP);
-        maxHP = data.maxHP;
+        maxHP = new ReactiveProperty<int>(data.maxHP);
         movementSpeed = new ReactiveProperty<int>(data.movementSpeed);
         turnRate = new ReactiveProperty<int>(data.turnRate);
         magazineCapacity = new ReactiveProperty<int>(data.magazineCapacity);
@@ -31,6 +31,6 @@ public class TankStatus : MonoBehaviour
     public void dealDamage(int amount)
     {
         if (amount <= 0) return;
-        HP.Value = Mathf.Clamp(HP.Value - amount, 0, data.maxHP);
+        HP.Value = Mathf.Clamp(HP.Value - amount, 0, maxHP.Value);
     }
 }
