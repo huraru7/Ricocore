@@ -7,11 +7,11 @@ public class TankStatus : MonoBehaviour
     [SerializeField] private TankData data;
 
     [Header("Status")]
-    public ReactiveProperty<int> HP { get; private set; }
-    public ReactiveProperty<int> maxHP { get; private set; }
-    public ReactiveProperty<int> movementSpeed { get; private set; }
-    public ReactiveProperty<int> turnRate { get; private set; }
-    public ReactiveProperty<int> magazineCapacity { get; private set; }
+    [SerializeField] private SerializableReactiveProperty<int> HP;
+    [SerializeField] private SerializableReactiveProperty<int> maxHP;
+    [SerializeField] private SerializableReactiveProperty<int> movementSpeed;
+    [SerializeField] private SerializableReactiveProperty<int> turnRate;
+    [SerializeField] private SerializableReactiveProperty<int> magazineCapacity;
 
     void Awake()
     {
@@ -21,11 +21,11 @@ public class TankStatus : MonoBehaviour
             return;
         }
 
-        HP = new ReactiveProperty<int>(data.maxHP);
-        maxHP = new ReactiveProperty<int>(data.maxHP);
-        movementSpeed = new ReactiveProperty<int>(data.movementSpeed);
-        turnRate = new ReactiveProperty<int>(data.turnRate);
-        magazineCapacity = new ReactiveProperty<int>(data.magazineCapacity);
+        HP = new(data.maxHP);
+        maxHP = new(data.maxHP);
+        movementSpeed = new(data.movementSpeed);
+        turnRate = new(data.turnRate);
+        magazineCapacity = new(data.magazineCapacity);
     }
 
     public void dealDamage(int amount)
