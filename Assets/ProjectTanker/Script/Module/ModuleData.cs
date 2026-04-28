@@ -8,6 +8,7 @@ public class ModuleData : ScriptableObject
 
 public enum ModuleElementEnum
 {
+    None,
     Earth,
     Water,
     Fire,

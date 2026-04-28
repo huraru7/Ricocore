@@ -1,23 +1,24 @@
 using System.Collections.Generic;
 using R3;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TankBulletManager : MonoBehaviour
 {
-    //弾システムを作る
+    //:弾システムを作る
 
     //do:総弾システム　リロード 召喚部分　オブジェクトプール　ダメージ処理
-    [Tooltip("TankStatus")]
+    [Header("TankStatus")]
     [SerializeField] private TankStatus _tankStatus;
 
-    [Tooltip("Setting")]
+    [Header("Setting")]
     [SerializeField] private GameObject bullet;
+    [SerializeField] private bool isShoot = true;
     [SerializeField] private SerializableReactiveProperty<int> totalRounds;
     public SerializableReactiveProperty<int> getTotalRounds => totalRounds;
 
-    [Tooltip("PoolSize")]
+    [Header("PoolSize")]
     [SerializeField] private int _poolSize = 5;
-
     private Queue<Bullet> _pool = new Queue<Bullet>();
 
     void Awake()
@@ -28,6 +29,12 @@ public class TankBulletManager : MonoBehaviour
             obj.SetActive(false);
             _pool.Enqueue(obj.GetComponent<Bullet>());
         }
+    }
+
+    void Start()
+    {
+        totalRounds.Value = _tankStatus.getMagazineCapacity.Value;
+        Debug.Log($"初期弾数: {totalRounds.Value}");
     }
 
     public void TakeDamage(int damage)
@@ -45,10 +52,18 @@ public class TankBulletManager : MonoBehaviour
             //リロード処理
             currentTime += Time.deltaTime;
 
-            if (currentTime > 5)//!:この5は後々リロード時間のステータスに紐づけるようにする
+            if (currentTime > 5)//!:この5は後々リロード時間のステータスに紐づける
             {
                 totalRounds.Value++;
+                currentTime = 0f;
+                Debug.Log($"りろーど 弾残量{totalRounds.Value}");
             }
+        }
+
+        if (Keyboard.current.spaceKey.wasPressedThisFrame && isShoot && totalRounds.Value >= 1)
+        {
+            spawnBullet(transform.up);
+            Debug.Log($"弾残量{totalRounds.Value}");
         }
     }
 
