@@ -819,6 +819,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &707212668
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 707212669}
+  m_Layer: 0
+  m_Name: BulletContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &707212669
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 707212668}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 9.98111, y: -19.67005, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &781937997
 GameObject:
   m_ObjectHideFlags: 0
@@ -912,9 +943,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TankBulletManager
   _tankStatus: {fileID: 781938003}
   bullet: {fileID: 2616927210013429467, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
+  isShoot: 1
   totalRounds:
     value: 0
   _poolSize: 10
+  _bulletParent: {fileID: 707212669}
 --- !u!114 &781938003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1404,63 +1437,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!1001 &6823492859295835085
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2616927210013429467, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_Name
-      value: Bullet
-      objectReference: {fileID: 0}
-    - target: {fileID: 7085084736160772299, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.17587
-      objectReference: {fileID: 0}
-    - target: {fileID: 7085084736160772299, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -3.86
-      objectReference: {fileID: 0}
-    - target: {fileID: 7085084736160772299, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7085084736160772299, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7085084736160772299, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7085084736160772299, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7085084736160772299, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7085084736160772299, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7085084736160772299, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7085084736160772299, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 4474e47b53d314527aff31f9cc9853a3, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1468,8 +1444,8 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 1875774511}
+  - {fileID: 707212669}
   - {fileID: 781937999}
   - {fileID: 1890920661}
   - {fileID: 633297789}
-  - {fileID: 6823492859295835085}
   - {fileID: 123003084}

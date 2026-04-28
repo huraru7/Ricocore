@@ -6,6 +6,8 @@ public class Bullet : MonoBehaviour
     [Tooltip("BulletSetting")]
     [SerializeField] private float speed = 10f;
     [SerializeField] private int damage = 1;
+    [SerializeField] private float lifeTime = 5f;
+    private float _currentLifeTime;
     private Rigidbody2D _rb;
     private Vector2 _direction;
     private TankBulletManager _owner;
@@ -25,6 +27,16 @@ public class Bullet : MonoBehaviour
         _owner = owner;
         _direction = direction.normalized;
         _rb.linearVelocity = _direction * speed;
+        _currentLifeTime = lifeTime;
+    }
+
+    void Update()
+    {
+        _currentLifeTime -= Time.deltaTime;
+        if (_currentLifeTime <= 0f && _owner != null)
+        {
+            _owner.ReturnBullet(this);
+        }
     }
 
     void OnDisable()

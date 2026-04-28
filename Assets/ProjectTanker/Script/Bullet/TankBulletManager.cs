@@ -19,13 +19,14 @@ public class TankBulletManager : MonoBehaviour
 
     [Header("PoolSize")]
     [SerializeField] private int _poolSize = 5;
+    [SerializeField] private Transform _bulletParent;
     private Queue<Bullet> _pool = new Queue<Bullet>();
 
     void Awake()
     {
         for (int i = 0; i < _poolSize; i++)
         {
-            var obj = Instantiate(bullet, transform.position, Quaternion.identity);
+            var obj = Instantiate(bullet, transform.position, Quaternion.identity, _bulletParent);
             obj.SetActive(false);
             _pool.Enqueue(obj.GetComponent<Bullet>());
         }
@@ -80,7 +81,7 @@ public class TankBulletManager : MonoBehaviour
         }
         else
         {
-            var obj = Instantiate(bullet, transform.position, Quaternion.identity);
+            var obj = Instantiate(bullet, transform.position, Quaternion.identity, _bulletParent);
             b = obj.GetComponent<Bullet>();
         }
 
