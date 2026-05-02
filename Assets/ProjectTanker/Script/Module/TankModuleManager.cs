@@ -23,7 +23,7 @@ public class TankModuleManager : MonoBehaviour
     /// <summary>
     /// 新規モジュールを獲得しインベントリへ追加
     /// </summary>
-    public void moduleEarn()
+    public void ModuleEarn()
     {
 
     }
@@ -67,6 +67,7 @@ public class TankModuleManager : MonoBehaviour
     private void RecalculateStats()
     {
         //!:再計算する前にstatusを初期値に戻してから計算してください
+        _tankStatus.ResetStatus();
 
         foreach (var (module, count) in stackCounts)
         {

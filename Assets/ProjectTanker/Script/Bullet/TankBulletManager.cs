@@ -40,7 +40,7 @@ public class TankBulletManager : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        _tankStatus.dealDamage(damage);
+        _tankStatus.DealDamage(damage);
         //do:ダメージ演出や効果音はここから呼び出せる。
     }
 
@@ -63,7 +63,7 @@ public class TankBulletManager : MonoBehaviour
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame && isShoot && totalRounds.Value >= 1)
         {
-            spawnBullet(transform.up);
+            SpawnBullet(transform.up);
             Debug.Log($"弾残量{totalRounds.Value}");
         }
     }
@@ -72,7 +72,7 @@ public class TankBulletManager : MonoBehaviour
     /// 弾の召喚
     /// </summary>
     /// <param name="direction">発射方向</param>
-    public void spawnBullet(Vector2 direction)
+    public void SpawnBullet(Vector2 direction)
     {
         Bullet b;
         if (_pool.Count > 0)

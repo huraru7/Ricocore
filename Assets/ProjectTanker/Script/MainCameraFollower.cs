@@ -3,7 +3,7 @@ using UnityEngine;
 public class MainCameraFollower : MonoBehaviour
 {
     [Header("Target")]
-    [SerializeField] private Transform _pickaxeTarget;
+    [SerializeField] private Transform _TankTarget;
     [SerializeField] private Vector3 _offset = new Vector3(0, 0, -10);
     [SerializeField] private float _smoothSpeed = 5f;
 
@@ -41,9 +41,9 @@ public class MainCameraFollower : MonoBehaviour
 
     void LateUpdate()
     {
-        if (_pickaxeTarget == null) return;
+        if (_TankTarget == null) return;
 
-        Vector3 targetPosition = _pickaxeTarget.position + _offset;
+        Vector3 targetPosition = _TankTarget.position + _offset;
 
         Vector3 newPosition = new Vector3(
             _followX ? targetPosition.x : _smoothedPosition.x,

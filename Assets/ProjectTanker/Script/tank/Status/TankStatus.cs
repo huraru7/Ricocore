@@ -32,9 +32,19 @@ public class TankStatus : MonoBehaviour
         magazineCapacity = new(data.magazineCapacity);
     }
 
+    /// <summary>
+    /// ステータスのリセット処理(モジュール再計算時に呼び出す)
+    /// </summary>
+    public void ResetStatus()
+    {
+        HP.Value = data.maxHP;
+        maxHP.Value = data.maxHP;
+        movementSpeed.Value = data.movementSpeed;
+        turnRate.Value = data.turnRate;
+        magazineCapacity.Value = data.magazineCapacity;
+    }
 
-
-    public void dealDamage(int amount)
+    public void DealDamage(int amount)
     {
         if (amount <= 0) return;
         HP.Value = Mathf.Clamp(HP.Value - amount, 0, maxHP.Value);

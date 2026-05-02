@@ -2,13 +2,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour
+public class TankController : MonoBehaviour
 {
     [Header("Setting")]
     [SerializeField] private float moveSpeed = 5f;
 
     [Header("Tank")]
-    [SerializeField] private GameObject tankBarrel;
+    // [SerializeField] private GameObject tankBarrel;
 
     private Rigidbody2D rb;
     private Vector2 move;
