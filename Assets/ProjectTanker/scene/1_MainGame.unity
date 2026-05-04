@@ -602,7 +602,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d530c34de92c0140824f3aa68431bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainCameraFollower
-  _pickaxeTarget: {fileID: 781937999}
+  _TankTarget: {fileID: 0}
   _offset: {x: 0, y: 0, z: -10}
   _smoothSpeed: 5
   _followX: 1
@@ -901,7 +901,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 5
-  tankBarrel: {fileID: 0}
+  turnRate: 2
+  _tankStatus: {fileID: 781938003}
 --- !u!50 &781938001
 Rigidbody2D:
   serializedVersion: 5
@@ -983,6 +984,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad317a1b5c0a445ef8c73b933d0f2c63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TankModuleManager
+  _tankStatus: {fileID: 781938003}
   moduleLists: []
 --- !u!1 &859758135
 GameObject:
