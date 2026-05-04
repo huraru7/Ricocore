@@ -10,11 +10,17 @@ public class TankController : MonoBehaviour
     [Header("Tank")]
     // [SerializeField] private GameObject tankBarrel;
 
+    [SerializeField] private TankStatus _tankStatus;
+
     private Rigidbody2D rb;
     private Vector2 move;
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+    }
+    private void Start()
+    {
+        moveSpeed = _tankStatus.getMovementSpeed.Value;
     }
     private void Update()
     {

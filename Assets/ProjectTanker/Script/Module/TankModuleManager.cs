@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Xml.Serialization;
 using UnityEngine;
 
 public class TankModuleManager : MonoBehaviour
@@ -9,9 +7,8 @@ public class TankModuleManager : MonoBehaviour
     //do:モジュールの獲得・消去　モジュール一覧 インベントリ モジュールのセット(インベントリからの移動)
     [SerializeField] private TankStatus _tankStatus;
 
-    [Tooltip("モジュール一覧")][SerializeField] private List<ModuleData> moduleLists;
-    [Tooltip("インベントリ")] public List<ModuleData> moduleInventory { get; private set; } = new List<ModuleData>();
-
+    [Tooltip("存在するモジュール一覧")][SerializeField] private List<ModuleData> moduleLists;
+    [Tooltip("所持モジュールインベントリ")] public List<ModuleData> moduleInventory { get; private set; } = new List<ModuleData>();
     [Tooltip("装備slot")] private ModuleData[] slots = new ModuleData[7];
 
     /// <summary>
@@ -25,7 +22,11 @@ public class TankModuleManager : MonoBehaviour
     /// </summary>
     public void ModuleEarn()
     {
+        int randomIndex = Random.Range(0, moduleLists.Count);
+        ModuleData newModule = moduleLists[randomIndex];
+        moduleInventory.Add(newModule);
 
+        //:stackConstを更新
     }
 
     /// <summary>
