@@ -26,7 +26,6 @@ public class TankModuleManager : MonoBehaviour
         ModuleData newModule = moduleLists[randomIndex];
         moduleInventory.Add(newModule);
 
-        //:stackConstを更新
     }
 
     /// <summary>
