@@ -6,8 +6,6 @@ using UnityEngine.InputSystem;
 public class TankBulletManager : MonoBehaviour
 {
     //:弾システムを作る
-
-    //do:総弾システム　リロード 召喚部分　オブジェクトプール　ダメージ処理
     [Header("TankStatus")]
     [SerializeField] private TankStatus _tankStatus;
 
