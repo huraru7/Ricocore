@@ -5,13 +5,14 @@ public class TankPresenter : MonoBehaviour
 {
     [Header("Model")]
     [SerializeField] private TankStatus tankStatus;
+
     // [Header("View")]
     // [SerializeField] private TankView tankView;
 
 
     void Start()
     {
-        //!:現在未完成、実装予定。
+        //!:現在未完 実装予定。
         //do:UI部分の実装が完了次第、tankstatusをUIのシステムへ通知するようにする。
 
 

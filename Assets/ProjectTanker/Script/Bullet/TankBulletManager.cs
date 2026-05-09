@@ -51,7 +51,7 @@ public class TankBulletManager : MonoBehaviour
             //リロード処理
             currentTime += Time.deltaTime;
 
-            if (currentTime > 5)//!:この5は後々リロード時間のステータスに紐づける
+            if (currentTime > _tankStatus.getReloadTime.Value)
             {
                 totalRounds.Value++;
                 currentTime = 0f;

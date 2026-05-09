@@ -16,16 +16,15 @@ public class TankModuleManager : MonoBehaviour
     /// </summary>
     private Dictionary<ModuleData, int> stackCounts = new();
 
-
     /// <summary>
     /// 新規モジュールを獲得しインベントリへ追加
     /// </summary>
     public void ModuleEarn()
     {
+        //do:モジュールの獲得システム モジュールを３択からプライヤーが選ぶ形で獲得する ３択のモジュールはランダム(多少の重さはつけたほうがいいかもしれない.ゲームバランス的に)
         int randomIndex = Random.Range(0, moduleLists.Count);
         ModuleData newModule = moduleLists[randomIndex];
         moduleInventory.Add(newModule);
-
     }
 
     /// <summary>
@@ -35,23 +34,27 @@ public class TankModuleManager : MonoBehaviour
     /// <param name="newModule">入るモジュールデータ</param>
     public void SetModule(int slotIndex, ModuleData newModule)
     {
+        //:slotIndexの範囲外なら処理しない
+        if (slotIndex < 0 || slotIndex >= slots.Length)
+            return;
+
         //:slotsを更新
-        //もともとのモジュールを見て、入っていたら古いモジュールを減らす
+        //:入れる予定のスロットにあるモジュールを見て、入っていたら古いモジュールを減らす
         ModuleData oldModule = slots[slotIndex];
         if (oldModule != null)
         {
             stackCounts[oldModule]--;
         }
 
-        //新しいモジュールに置き換える
+        //:新しいモジュールに置き換える
         slots[slotIndex] = newModule;
 
-        //新しいモジュールがnull（空にする）場合はskip
+        //:新しいモジュールがnullでなければ新しいモジュールのカウントを増やす
         if (newModule != null)
         {
             if (!stackCounts.ContainsKey(newModule))
             {
-                //初めて入るモジュールの場合0で初期化した後にカウントを足す
+                //:初めて入るモジュールの場合0で初期化した後にカウントを足す
                 stackCounts[newModule] = 0;
             }
             stackCounts[newModule]++;
@@ -76,7 +79,7 @@ public class TankModuleManager : MonoBehaviour
 
             foreach (var effect in module.specialEffects)
             {
-                //モジュール効果が各ステータスを更新する
+                //:モジュール効果が各ステータスを更新する
                 effect.Apply(_tankStatus, count);
             }
         }
