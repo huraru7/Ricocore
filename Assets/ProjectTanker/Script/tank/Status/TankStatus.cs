@@ -1,5 +1,5 @@
+using System;
 using R3;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class TankStatus : MonoBehaviour
@@ -8,11 +8,23 @@ public class TankStatus : MonoBehaviour
     [SerializeField] private TankData data;
 
     [Header("Status")]
-    public ReactiveProperty<int> HP { get; private set; }
-    public int maxHP;
-    public ReactiveProperty<int> movementSpeed { get; private set; }
-    public ReactiveProperty<int> turnRate { get; private set; }
-    public ReactiveProperty<int> magazineCapacity { get; private set; }
+    [SerializeField] private SerializableReactiveProperty<int> HP;
+    [SerializeField] private SerializableReactiveProperty<int> maxHP;
+    [SerializeField] private SerializableReactiveProperty<int> baseAttackPower;
+    [SerializeField] private SerializableReactiveProperty<int> movementSpeed;
+    [SerializeField] private SerializableReactiveProperty<int> turnRate;
+    [SerializeField] private SerializableReactiveProperty<float> bulletSpeed;
+    [SerializeField] private SerializableReactiveProperty<int> magazineCapacity;
+    [SerializeField] private SerializableReactiveProperty<float> reloadTime;
+
+    public SerializableReactiveProperty<int> getHP => HP;
+    public SerializableReactiveProperty<int> getMaxHP => maxHP;
+    public SerializableReactiveProperty<int> getBaseAttackPower => baseAttackPower;
+    public SerializableReactiveProperty<int> getMagazineCapacity => magazineCapacity;
+    public SerializableReactiveProperty<int> getMovementSpeed => movementSpeed;
+    public SerializableReactiveProperty<int> getTurnRate => turnRate;
+    public SerializableReactiveProperty<float> getBulletSpeed => bulletSpeed;
+    public SerializableReactiveProperty<float> getReloadTime => reloadTime;
 
     void Awake()
     {
@@ -22,16 +34,34 @@ public class TankStatus : MonoBehaviour
             return;
         }
 
-        HP = new ReactiveProperty<int>(data.maxHP);
-        maxHP = data.maxHP;
-        movementSpeed = new ReactiveProperty<int>(data.movementSpeed);
-        turnRate = new ReactiveProperty<int>(data.turnRate);
-        magazineCapacity = new ReactiveProperty<int>(data.magazineCapacity);
+        HP = new(data.maxHP);
+        maxHP = new(data.maxHP);
+        baseAttackPower = new(data.baseAttackPower);
+        movementSpeed = new(data.movementSpeed);
+        turnRate = new(data.turnRate);
+        bulletSpeed = new(data.bulletSpeed);
+        magazineCapacity = new(data.magazineCapacity);
+        reloadTime = new(data.reloadTime);
     }
 
-    public void dealDamage(int amount)
+    /// <summary>
+    /// ステータスのリセット処理(モジュール再計算時に呼び出す)
+    /// </summary>
+    public void ResetStatus()
+    {
+        HP.Value = data.maxHP;
+        maxHP.Value = data.maxHP;
+        baseAttackPower.Value = data.baseAttackPower;
+        movementSpeed.Value = data.movementSpeed;
+        turnRate.Value = data.turnRate;
+        bulletSpeed.Value = data.bulletSpeed;
+        magazineCapacity.Value = data.magazineCapacity;
+        reloadTime.Value = data.reloadTime;
+    }
+
+    public void DealDamage(int amount)
     {
         if (amount <= 0) return;
-        HP.Value = Mathf.Clamp(HP.Value - amount, 0, data.maxHP);
+        HP.Value = Mathf.Clamp(HP.Value - amount, 0, maxHP.Value);
     }
 }
