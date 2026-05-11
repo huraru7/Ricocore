@@ -20,6 +20,10 @@ public class TankModuleManager : MonoBehaviour
     private readonly Subject<ModuleData[]> _onModuleCandidatesGenerated = new();
     public Observable<ModuleData[]> OnModuleCandidatesGenerated => _onModuleCandidatesGenerated;
 
+    public void Start()
+    {
+        ModuleEarn();//:デバッグ
+    }
     /// <summary>
     /// 3択候補を生成してPresenterへ通知する
     /// </summary>

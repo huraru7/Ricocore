@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aafff0ac387d84036b49187cd4d491cc, type: 3}
   m_Name: Module
   m_EditorClassIdentifier: Assembly-CSharp::ModuleData
-  moduleName: 
-  description: 
-  icon: {fileID: 0}
+  moduleName: testmodule
+  description: test^test^test
+  icon: {fileID: -1081386278238201723, guid: 57c095fb3d8121f4193c6ff29e0567be, type: 3}
   moduleElement: 0
   specialEffects: []

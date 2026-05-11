@@ -1911,7 +1911,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TankModuleManager
   _tankStatus: {fileID: 781938003}
-  moduleLists: []
+  moduleLists:
+  - {fileID: 11400000, guid: ef1e75fb99b72914bb5329a3d1460aa0, type: 2}
+  - {fileID: 11400000, guid: ef1e75fb99b72914bb5329a3d1460aa0, type: 2}
+  - {fileID: 11400000, guid: ef1e75fb99b72914bb5329a3d1460aa0, type: 2}
 --- !u!1 &859758135
 GameObject:
   m_ObjectHideFlags: 0
@@ -2566,7 +2569,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1643216106
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2603,7 +2606,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GetModuleSelectUI
   panel: {fileID: 1643216105}
   optionButtons:
-  - {fileID: 0}
+  - {fileID: 1408093429}
+  - {fileID: 671325454}
+  - {fileID: 202300773}
 --- !u!1 &1820788314
 GameObject:
   m_ObjectHideFlags: 0
