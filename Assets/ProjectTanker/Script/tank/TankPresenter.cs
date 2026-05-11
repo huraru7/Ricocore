@@ -5,16 +5,21 @@ public class TankPresenter : MonoBehaviour
 {
     [Header("Model")]
     [SerializeField] private TankStatus tankStatus;
+    [SerializeField] private TankModuleManager tankModuleManager;
 
     [Header("View")]
     [SerializeField] private GetModuleSelectUI getModuleSelectUI;
 
-
     void Start()
     {
-        //!:現在未完 実装予定。
-        //do:UI部分の実装が完了次第、tankstatusをUIのシステムへ通知するようにする。
+        //:Model→View: 3択候補が生成されたらUIに表示
+        tankModuleManager.OnModuleCandidatesGenerated
+            .Subscribe(candidates => getModuleSelectUI.ShowOptions(candidates))
+            .AddTo(this);
 
-        //:tankStatus.HP.Subscribe(hp => view.UpdateHP(hp, tankStatus.maxHP)).AddTo(this);
+        //:View→Model: プレイヤーが選択したらインベントリへ追加
+        getModuleSelectUI.OnModuleSelected
+            .Subscribe(selected => tankModuleManager.AddToInventory(selected))
+            .AddTo(this);
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using R3;
 using UnityEngine;
 
 public class TankModuleManager : MonoBehaviour
@@ -16,15 +17,38 @@ public class TankModuleManager : MonoBehaviour
     /// </summary>
     private Dictionary<ModuleData, int> stackCounts = new();
 
+    private readonly Subject<ModuleData[]> _onModuleCandidatesGenerated = new();
+    public Observable<ModuleData[]> OnModuleCandidatesGenerated => _onModuleCandidatesGenerated;
+
     /// <summary>
-    /// 新規モジュールを獲得しインベントリへ追加
+    /// 3択候補を生成してPresenterへ通知する
     /// </summary>
     public void ModuleEarn()
     {
-        //do:モジュールの獲得システム モジュールを３択からプライヤーが選ぶ形で獲得する ３択のモジュールはランダム(多少の重さはつけたほうがいいかもしれない.ゲームバランス的に)
-        int randomIndex = Random.Range(0, moduleLists.Count);
-        ModuleData newModule = moduleLists[randomIndex];
-        moduleInventory.Add(newModule);
+        //do:重みつきランダムへの改良を検討(ゲームバランス的に)
+        List<ModuleData> pool = new(moduleLists);
+        ModuleData[] candidates = new ModuleData[Mathf.Min(3, pool.Count)];
+        for (int i = 0; i < candidates.Length; i++)
+        {
+            int idx = Random.Range(0, pool.Count);
+            candidates[i] = pool[idx];
+            pool.RemoveAt(idx);
+        }
+        _onModuleCandidatesGenerated.OnNext(candidates);
+    }
+
+    /// <summary>
+    /// プレイヤーが選んだモジュールをインベントリへ追加
+    /// </summary>
+    public void AddToInventory(ModuleData selected)
+    {
+        if (selected == null) return;
+        moduleInventory.Add(selected);
+    }
+
+    private void OnDestroy()
+    {
+        _onModuleCandidatesGenerated.Dispose();
     }
 
     /// <summary>
