@@ -10,6 +10,7 @@ public class TankPresenter : MonoBehaviour
     [Header("View")]
     [SerializeField] private GetModuleSelectUI getModuleSelectUI;
     [SerializeField] private InventoryUI inventoryUI;
+    [SerializeField] private SlotUI slotUI;
 
     void Start()
     {
@@ -26,6 +27,14 @@ public class TankPresenter : MonoBehaviour
         //:Model→View: インベントリが変化したら一覧を更新
         tankModuleManager.OnInventoryChanged
             .Subscribe(inventory => inventoryUI.UpdateDisplay(inventory))
+            .AddTo(this);
+
+        //:初期表示（全スロット空状態）
+        slotUI.UpdateDisplay(tankModuleManager.Slots);
+
+        //:Model→View: スロットが変化したら一覧を更新
+        tankModuleManager.OnSlotsChanged
+            .Subscribe(slots => slotUI.UpdateDisplay(slots))
             .AddTo(this);
 
         tankModuleManager.ModuleEarn();//:デバッグ用

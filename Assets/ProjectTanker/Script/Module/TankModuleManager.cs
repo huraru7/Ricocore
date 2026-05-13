@@ -11,6 +11,7 @@ public class TankModuleManager : MonoBehaviour
     [Tooltip("存在するモジュール一覧")][SerializeField] private List<ModuleData> moduleLists;
     [Tooltip("所持モジュールインベントリ")] public List<ModuleData> moduleInventory { get; private set; } = new List<ModuleData>();
     [Tooltip("装備slot")] private ModuleData[] slots = new ModuleData[7];
+    public IReadOnlyList<ModuleData> Slots => slots;
 
     /// <summary>
     /// 持っているモジュールの種類と個数を記録する辞書型のデータ
@@ -22,6 +23,9 @@ public class TankModuleManager : MonoBehaviour
 
     private readonly Subject<IReadOnlyList<ModuleData>> _onInventoryChanged = new();
     public Observable<IReadOnlyList<ModuleData>> OnInventoryChanged => _onInventoryChanged;
+
+    private readonly Subject<IReadOnlyList<ModuleData>> _onSlotsChanged = new();
+    public Observable<IReadOnlyList<ModuleData>> OnSlotsChanged => _onSlotsChanged;
 
     /// <summary>
     /// 3択候補を生成してPresenterへ通知する
@@ -54,6 +58,7 @@ public class TankModuleManager : MonoBehaviour
     {
         _onModuleCandidatesGenerated.Dispose();
         _onInventoryChanged.Dispose();
+        _onSlotsChanged.Dispose();
     }
 
     /// <summary>
@@ -91,6 +96,7 @@ public class TankModuleManager : MonoBehaviour
 
         //:効果の再計算を行う
         RecalculateStats();
+        _onSlotsChanged.OnNext(slots); //:スロット変化を通知
     }
 
     /// <summary>
