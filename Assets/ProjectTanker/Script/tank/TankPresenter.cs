@@ -10,6 +10,9 @@ public class TankPresenter : MonoBehaviour
     [Header("View")]
     [SerializeField] private GetModuleSelectUI getModuleSelectUI;
     [SerializeField] private SlotUI slotUI;
+    [SerializeField] private ModuleReplaceUI moduleReplaceUI;
+
+    private ModuleData _pendingModule;
 
     void Start()
     {
@@ -18,9 +21,30 @@ public class TankPresenter : MonoBehaviour
             .Subscribe(candidates => getModuleSelectUI.ShowOptions(candidates))
             .AddTo(this);
 
-        // View→Model: 選択されたモジュールを空きスロットへ自動装備
+        // View→Model: 選択されたモジュールを空きスロットへ自動装備、満杯なら入れ替えUIへ
         getModuleSelectUI.OnModuleSelected
-            .Subscribe(selected => tankModuleManager.TryAutoEquip(selected))
+            .Subscribe(selected =>
+            {
+                if (tankModuleManager.TryAutoEquip(selected))
+                {
+                    _pendingModule = null;
+                }
+                else
+                {
+                    _pendingModule = selected;
+                    moduleReplaceUI.Show(selected, tankModuleManager.Slots);
+                }
+            })
+            .AddTo(this);
+
+        // View→Model: 入れ替え/破棄の決定を受け取る
+        moduleReplaceUI.OnDecision
+            .Subscribe(slotIndex =>
+            {
+                if (slotIndex >= 0 && _pendingModule != null)
+                    tankModuleManager.SetModule(slotIndex, _pendingModule);
+                _pendingModule = null;
+            })
             .AddTo(this);
 
         // 初期表示
