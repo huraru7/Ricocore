@@ -1,6 +1,6 @@
-# Unity エディタ作業ガイド — Shapez 風 UI 構築
+# Unity エディタ作業ガイド — インベントリ廃止・装備スロット一本化
 
-> スクリプトの追加・変更は完了済み。このファイルの手順に沿って Unity エディタ側の設定を行ってください。
+> コード側の変更（STEP 1）は完了済み。このファイルの手順に沿って Unity エディタ側を整理してください。
 
 ---
 
@@ -12,8 +12,6 @@
 枠線         #CFC9C2
 テキスト主   #3D3833
 テキスト副   #7A766F
-ボタン通常   #DDD8D1
-ボタン強調   #B5AFA7
 
 Earth        #7CB87E
 Water        #7BAFD4
@@ -22,366 +20,256 @@ Wind         #F2CC6A
 None         #B0ABA3
 ```
 
-> Unity の Color フィールドに16進数を入力するには、カラーピッカーを開いて左下の「#」欄に貼り付けます。
+---
+
+# STEP 1 — インベントリ関連オブジェクトの削除
+
+## 1-1. コンパイルエラーの確認
+
+Unity がスクリプト変更を検知して自動リコンパイルします。
+
+1. `Window > General > Console`（`Ctrl+Shift+C`）を開く
+2. **赤いエラーが 0 件**になるまで待つ
+
+> エラーが残っている場合は次の作業に進まないでください。
 
 ---
 
-## ✅ 完了済み作業（1〜6）
+## 1-2. シーンから ModuleInventory を削除
 
-| # | 作業内容 | 備考 |
-|---|---|---|
-| 1 | ThemeColor アセットの作成 | `Assets/ProjectTanker/Data/ThemeColor.asset` |
-| 2 | フォントのセットアップ | NotoSansJP を Dynamic モードで生成、デフォルト設定済み |
-| 3 | カメラ・Canvas 背景色の設定 | カメラ背景・背景パネルを `#F0EDE8` に変更済み |
-| 4 | モジュール3択UI のリデザイン | AccentBar・カード型レイアウト・ホバー効果を設定済み |
-| 5 | 装備スロット UI のリデザイン | AccentLine・SlotNumber・ThemeColor アサイン済み |
-| 6 | インベントリ UI のリデザイン | ElementDot・Vertical Layout Group・Prefab 保存済み |
+`1_MainGame.unity` を開いた状態で行います。
 
----
+1. Hierarchy ウィンドウで **`Canvas`** の左の三角を展開する
+2. `Canvas` 以下に **`ModuleInventory`**（または `InventoryUI` という名前）のオブジェクトを探す
+3. 見つけたらクリックして選択 → **`Delete` キー** で削除
+4. Hierarchy から消えたことを確認
 
-## 目次（残り作業）
-
-7. [ゲーム内 HUD の作成](#7-ゲーム内-hud-の作成)
-8. [動作確認・テスト手順](#8-動作確認テスト手順)
-9. [トラブルシューティング](#9-トラブルシューティング)
+> 名前が違う場合は Inspector で `InventoryUI` スクリプトがついているオブジェクトを探してください。
 
 ---
 
-## 7. ゲーム内 HUD の作成
+## 1-3. TankPresenter の Inspector を確認・整理
 
-HUD はゲームプレイ中に常時表示される HP バーと弾数表示です。  
-`GameHUD.cs` スクリプトは作成済みなので、Unity 側で GameObject とコンポーネントを組み立てます。
+1. Hierarchy で **`Canvas`** または **`TankPresenter`** がアタッチされているオブジェクトを選択
+2. Inspector の `TankPresenter` コンポーネントを確認する
+3. 以下のフィールドが**残っていないこと**を確認する
+   - `Inventory UI` フィールド（スクリプト変更により自動で消えているはず）
+4. もし `None (Inventory UI)` のような欄が残っていたら、スクリプトのリコンパイルが完了していない可能性があります。Console のエラーを確認してください。
 
-### 7-1. HUD の親 GameObject を作成
+**現在残っているべきフィールド（View セクション）:**
 
-1. Hierarchy で `Canvas` を右クリック → **`Create Empty`**
-2. 名前を `HUD` に変更
-3. `RectTransform` の Anchor を **Stretch / Stretch**（四隅すべて）に設定し Left/Right/Top/Bottom をすべて `0` にする（Canvas 全体を覆う）
-4. `HUD` を選択した状態で Inspector の **`Add Component`** → `GameHUD` を検索してアタッチ
-
----
-
-### 7-2. HP バーの作成
-
-HP バーは画面左上に固定します。
-
-#### GameObject の構成
-
-```
-HUD
-└── HPArea
-    ├── HPBackground   （背景の枠）
-    ├── HPFill         （実際に縮むバー）
-    └── HPText         （"12 / 12" のテキスト）
-```
-
-#### 手順
-
-**HPArea を作成する**
-
-1. `HUD` を右クリック → `Create Empty` → 名前を `HPArea` に変更
-2. `RectTransform` を以下に設定：
-
-| 項目 | 値 |
+| フィールド名 | アサインされているもの |
 |---|---|
-| Anchor | **Top Left**（左上固定） |
-| Pivot | `0, 1` |
-| Pos X | `16` |
-| Pos Y | `-16` |
-| Width | `200` |
-| Height | `32` |
-
-**HPBackground を作成する**
-
-1. `HPArea` を右クリック → `UI > Image` → 名前を `HPBackground` に変更
-2. Anchor を **Stretch / Stretch**（全面）に設定、Left/Right/Top/Bottom = `0`
-3. `Color` を `#CFC9C2` に設定
-
-**HPFill を作成する**
-
-1. `HPArea` を右クリック → `UI > Image` → 名前を `HPFill` に変更
-2. Anchor を **Stretch / Stretch**（全面）に設定、Left/Right/Top/Bottom = `0`
-3. `Color` を `#E07A5F` に設定（スクリプトが HP 残量に応じて変化させる）
-4. `Image Type` を **`Filled`** に変更
-5. `Fill Method` を **`Horizontal`** に変更
-6. `Fill Origin` を **`Left`** に変更
-7. `Fill Amount` を **`1`** に設定（初期値：満タン）
-
-> ⚠️ `Image Type` を Filled にしないと HP が減っても見た目が変わりません。必ず設定してください。
-
-**HPText を作成する**
-
-1. `HPArea` を右クリック → `UI > Text - TextMeshPro` → 名前を `HPText` に変更
-2. Anchor を **Stretch / Stretch**（全面）に設定、Left/Right/Top/Bottom = `0`
-3. Inspector の TextMeshPro コンポーネントを設定：
-   - `Text` 欄に `12 / 12`（仮の表示、実行時にスクリプトが書き換える）
-   - `Font Size` : `12`
-   - `Alignment` : **Center / Middle**（水平・垂直とも中央）
-   - `Color` : `#3D3833`
+| `Get Module Select UI` | モジュール3択パネルの GameObject |
+| `Slot UI` | スロットUIの GameObject |
 
 ---
 
-### 7-3. 弾数表示エリアの作成
+## 1-4. ModuleInventoryPanel Prefab の確認
 
-弾数表示は画面右下に固定します。
+`InventoryItemUI.cs` は削除しましたが、Prefab ファイル自体はまだ残っています。
 
-#### GameObject の構成
+1. Project ウィンドウで `Assets/ProjectTanker/Prefab/ModuleInventoryPanel.prefab` を探す
+2. Prefab を選択して Inspector を開く
+3. **Missing Script** の警告（黄色または赤）が出ていたら以下を行う：
+   - Prefab をダブルクリックして開く
+   - Missing Script がついているコンポーネントの右の `⋮` メニュー → `Remove Component` で削除
+   - `Ctrl+S` で Prefab を保存して閉じる
+4. この Prefab はもう使わないため、削除してもかまいません
+   - Project ウィンドウで右クリック → `Delete`
 
-```
-HUD
-└── AmmoArea
-    ├── AmmoContainer      （弾アイコンを横並びに生成する親）
-    ├── AmmoBulletPrefab   （弾アイコンのテンプレート、非表示）
-    └── ReloadCircle       （リロード中に表示する円形プログレス、非表示）
-```
+---
 
-#### 手順
+## 1-5. SlotItemUI の Inspector 確認（7つ分）
 
-**AmmoArea を作成する**
+ドラッグ&ドロップ関連の Script を撤去したため、SlotItem の Inspector が変わっています。
 
-1. `HUD` を右クリック → `Create Empty` → 名前を `AmmoArea` に変更
-2. `RectTransform` を以下に設定：
+1. Hierarchy で `Canvas > Slot` を展開する
+2. `SlotItem` × 7 を順番に選択し、Inspector の `SlotItemUI` コンポーネントを確認する
+3. 以下のフィールドが残っていること（アサインが外れていないか）を確認する
 
-| 項目 | 値 |
+| フィールド | 内容 |
 |---|---|
-| Anchor | **Bottom Right**（右下固定） |
-| Pivot | `1, 0` |
-| Pos X | `-16` |
-| Pos Y | `16` |
-| Width | `200` |
-| Height | `40` |
+| `Icon Image` | アイコン表示用 Image |
+| `Name Text` | モジュール名 TextMeshProUGUI |
+| `Accent Line` | 属性カラーライン Image |
+| `Slot Number` | スロット番号 TextMeshProUGUI |
+| `Theme` | ThemeColor アセット |
 
-**AmmoContainer を作成する**
-
-1. `AmmoArea` を右クリック → `Create Empty` → 名前を `AmmoContainer` に変更
-2. Anchor を **Stretch / Stretch**（全面）に設定
-3. `Add Component` → **`Horizontal Layout Group`** を追加
-   - `Spacing` : `4`
-   - `Child Alignment` : **Middle Right**
-   - `Control Child Size` : Width・Height ともに OFF
-   - `Child Force Expand` : Width・Height ともに OFF
-
-**AmmoBulletPrefab を作成する**
-
-1. `AmmoArea` を右クリック → `UI > Image` → 名前を `AmmoBulletPrefab` に変更
-2. サイズ: Width `16`、Height `16`
-3. `Color` を `#3D3833` に設定
-4. Sprite は弾丸アイコンがあればアサイン、なければ `UI/Default`（白い四角）で仮置きでOK
-5. Inspector 上部のチェックボックス（GameObject の有効/無効）を **OFF（非表示）** にする
-
-> `AmmoBulletPrefab` は Instantiate のテンプレートとして使います。Hierarchy 上に置いたまま非表示にしてください。
-
-**ReloadCircle を作成する**
-
-1. `AmmoArea` を右クリック → `UI > Image` → 名前を `ReloadCircle` に変更
-2. サイズ: Width `32`、Height `32`
-3. Anchor を **Middle Right**（中央右）に設定
-4. `Image Type` を **`Filled`** に変更
-5. `Fill Method` を **`Radial 360`** に変更
-6. `Fill Origin` を **`Top`** に変更
-7. `Fill Amount` を **`0`** に設定（初期値：空）
-8. `Color` を `#7A766F` に設定
-9. Inspector 上部のチェックボックスを **OFF（非表示）** にする
+> ドラッグ&ドロップ関連のフィールド（`On Drop` など）は消えているはずです。正常です。
 
 ---
 
-### 7-4. GameHUD スクリプトへの参照アサイン
+## 1-6. EventSystem の確認
 
-`HUD` オブジェクトの `GameHUD` コンポーネントを選択して、各フィールドに参照をドラッグします。
+Hierarchy に `EventSystem` が残っていることを確認します。  
+削除してしまうとボタンクリックが一切効かなくなります。
 
-| Inspector のフィールド名 | アサインするもの | 場所 |
-|---|---|---|
-| `Tank Status` | `TankStatus` コンポーネント | `Tank` GameObject |
-| `Bullet Manager` | `TankBulletManager` コンポーネント | `Tank` GameObject |
-| `Theme` | `ThemeColor.asset` | `Assets/ProjectTanker/Data/` |
-| `Hp Fill` | `HPFill` の **Image コンポーネント** | `HUD/HPArea/HPFill` |
-| `Hp Text` | `HPText` の **TextMeshProUGUI コンポーネント** | `HUD/HPArea/HPText` |
-| `Ammo Container` | `AmmoContainer` の **Transform** | `HUD/AmmoArea/AmmoContainer` |
-| `Ammo Bullet Prefab` | `AmmoBulletPrefab` の **Image コンポーネント** | `HUD/AmmoArea/AmmoBulletPrefab` |
-| `Reload Circle` | `ReloadCircle` の **Image コンポーネント** | `HUD/AmmoArea/ReloadCircle` |
-
-> **コンポーネントをドラッグするには**: Hierarchy でオブジェクトを選択して Inspector を開き、目的のコンポーネント名（例：`Image`）の左のアイコン部分を、GameHUD の対応フィールドへドラッグします。
+1. Hierarchy で `EventSystem` を探す
+2. **存在していれば OK**（何もしない）
+3. なければ `GameObject > UI > Event System` で追加する
 
 ---
 
-### 7-5. シーンを保存
+## 1-7. シーンを保存
 
-`Ctrl + S` でシーンを保存してください。
-
----
-
-## 8. 動作確認・テスト手順
-
-ここからはプレイモードに入って実際の動作を確認します。  
-各項目を上から順番にテストしてください。
+`Ctrl + S` でシーンを保存します。
 
 ---
 
-### 8-1. 起動時の表示確認
+## 1-8. 動作確認（プレイモード）
 
-1. Unity エディタ上部の **▶ ボタン**を押してプレイモードを開始
-2. 以下を目視確認する
+`▶` でプレイモードを開始し、以下をすべて確認してください。
 
-| 確認項目 | 期待される表示 |
+| 確認項目 | 期待する結果 |
 |---|---|
-| 画面全体の背景色 | クリーム色（`#F0EDE8`）になっている |
-| 左上 | HP バーが表示されている（コーラルレッドのバー） |
-| 右下 | 弾数アイコンが `TankData` の `magazineCapacity` の数だけ横に並んでいる |
-| 画面下部中央 | 7つのスロットが横一列に表示されている |
-| 画面中央 | モジュール3択カードが表示されている |
-
-**うまくいかない場合**:  
-→ HP バーが出ない：`GameHUD` の `Hp Fill` フィールドに `HPFill` がアサインされているか確認  
-→ 弾数アイコンが出ない：`Ammo Bullet Prefab` フィールドに `AmmoBulletPrefab` の **Image** がアサインされているか確認（GameObject ではなく Image コンポーネント）
+| Console にエラーが出ない | ✅ |
+| ゲーム開始時に3択カードが表示される | ✅ |
+| カードを選択する | 最初の空きスロットに自動装備される ✅ |
+| 7スロット全部が埋まった状態でカードを選択 | 何も起きない（エラーなし）✅ |
+| E キーを押してもインベントリが開かない | ✅（削除済みのため） |
 
 ---
 
-### 8-2. モジュール3択 UI のテスト
+# STEP 2 — ModuleReplaceUI の作成（スロット満杯時の入れ替え/破棄）
 
-ゲーム開始直後に3択カードが自動表示されます（`TankPresenter` がデバッグ用に `ModuleEarn()` を呼んでいるため）。
-
-**確認手順**
-
-1. プレイモード開始 → 画面中央に3枚のカードが表示されるのを確認
-2. 各カード上部に色のついたバー（AccentBar）が表示されているか確認
-   - モジュールの属性が `None` の場合はグレー（`#B0ABA3`）で表示される
-3. いずれか1枚のカードをクリックする
-   - カードパネルが閉じることを確認
-   - E キーを押してインベントリを開き、選んだモジュールが一覧に追加されていることを確認
-
-**確認チェック**
-- [ ] 3択カードが表示される
-- [ ] カード上部に AccentBar の色が表示される
-- [ ] クリックでパネルが閉じてインベントリに追加される
+STEP 1 の動作確認が完了してから進めてください。
 
 ---
 
-### 8-3. インベントリ UI のテスト
+## 2-1. ModuleReplacePanel オブジェクトの作成
 
-**確認手順**
-
-1. **E キー** を押してインベントリパネルが開くことを確認
-2. 追加したモジュールのアイテム行が表示されているか確認
-   - アイコン・モジュール名・右端の属性カラードットが表示されているか確認
-3. **E キー** をもう一度押してパネルが閉じることを確認
-
-**ドラッグ&ドロップのテスト**
-
-1. E キーでインベントリを開く
-2. アイテム行をドラッグ開始 → カーソルに半透明（70%）のゴーストアイコンが追従することを確認
-3. そのまま画面下部のいずれかのスロットへドラッグしてドロップする
-   - スロットにアイコンが表示されること
-   - スロット下部の AccentLine に属性カラーが表示されること
-
-**確認チェック**
-- [ ] E キーでパネルが開閉する
-- [ ] アイテム行に属性ドットが表示される
-- [ ] ドラッグ中にゴーストが半透明で追従する
-- [ ] スロットへドロップで装備できる
-- [ ] スロットの AccentLine に属性色が出る
+1. Hierarchy で **`Canvas`** を右クリック → `Create Empty`
+2. 名前を **`ModuleReplacePanel`** に変更
+3. `ModuleReplaceUI` スクリプトをアタッチ（Inspector の `Add Component` から検索）
 
 ---
 
-### 8-4. スロット → インベントリ への取り外しテスト
+## 2-2. パネルの構成を組む
 
-**確認手順**
+`ModuleReplacePanel` 以下に以下の構造を作ります。
 
-1. スロットに装備済みのモジュールアイコンをドラッグ開始
-2. インベントリパネルを E キーで開いておき、そのままパネル上へドロップする
-   - スロットからモジュールが消えること
-   - インベントリにモジュールが戻ること
-
-**確認チェック**
-- [ ] スロット→インベントリへのドラッグ&ドロップで取り外せる
-
----
-
-### 8-5. HP バーのテスト
-
-現時点で HP を手動で減らすトリガーがない場合は、スクリプトに一時的なデバッグコードを追加して確認します。
-
-**`TankPresenter.cs` の `Start()` 末尾に1行追加（デバッグ用）**
-
-```csharp
-// デバッグ: HP を半分に減らして表示を確認
-tankStatus.DealDamage(tankStatus.getMaxHP.Value / 2);
+```
+ModuleReplacePanel
+└── Panel                      Image（背景、Color: #E9E5DF）
+    ├── NewModuleArea          空 GameObject（取得モジュール表示エリア）
+    │   ├── NewModuleIcon      Image（取得したモジュールのアイコン）
+    │   └── NewModuleName      TextMeshProUGUI（モジュール名）
+    ├── Label                  TextMeshProUGUI（「どうしますか？」など）
+    ├── SlotButtons            空 GameObject（スロット選択ボタンの親）
+    │   └── SlotOptionButton × 7   ModuleOptionButton コンポーネントつき
+    └── DiscardButton          Button（「破棄する」テキスト付き）
 ```
 
-**確認手順**
+### Panel の設定
 
-1. 上記コードを追加してプレイモードを開始
-2. HP バーが半分の長さになっているか確認
-3. バーの色が `#E07A5F`（コーラル）から `#F2CC6A`（イエロー）の中間色になっているか確認
+- Anchor: **Stretch / Stretch**（画面全体を薄く覆う半透明背景）または **Middle/Center** で中央固定パネル
+- Color: `#E9E5DF`、Alpha: `220`（約86%）
+- Width/Height を中央固定にする場合: 例 Width `500`、Height `400`
 
-**確認後は追加したデバッグコードを必ず削除してください。**
+### NewModuleIcon
 
-**確認チェック**
-- [ ] HP が減るとバーが縮まる
-- [ ] HP 残量でバーのグラデーション色が変わる
-- [ ] `HPText` に `現在HP / 最大HP` が表示される
+- サイズ: 64×64
+- Sprite: 実行時にスクリプトがセットするので空白でOK
+
+### NewModuleName
+
+- フォントサイズ: 16
+- Color: `#3D3833`
+- Alignment: Center
+
+### SlotButtons の設定
+
+- `Vertical Layout Group` コンポーネントを追加
+  - Spacing: `8`
+  - Child Force Expand Width: ON、Height: OFF
+
+### SlotOptionButton × 7 の作成
+
+既存の `ModuleOptionButton` Prefab を複製するか、新たに以下の構成で7つ作ります:
+
+```
+SlotOptionButton  （Button コンポーネント + ModuleOptionButton スクリプト）
+├── AccentBar     Image（属性カラーバー）
+├── IconImage     Image（スロットのモジュールアイコン）
+└── NameText      TextMeshProUGUI（スロットのモジュール名）
+```
+
+各 `SlotOptionButton` の `ModuleOptionButton` コンポーネントに以下をアサイン:
+- `Button` → 自身の Button コンポーネント
+- `Icon Image` → `IconImage`
+- `Name Text` → `NameText`
+- `Accent Bar` → `AccentBar`
+- `Theme` → `ThemeColor.asset`
+
+### DiscardButton の設定
+
+- Button コンポーネントつきの GameObject
+- 子に TextMeshProUGUI で「破棄する」のテキスト
+- Color: `#DDD8D1`（通常）、Highlighted: `#B5AFA7`
 
 ---
 
-### 8-6. 弾数・リロードのテスト
+## 2-3. パネルを初期非表示にする
 
-**確認手順**
+`ModuleReplacePanel` 以下の **`Panel`** オブジェクトを選択し、Inspector 上部のチェックを **OFF（非表示）** にする。
 
-1. プレイモードを開始し、右下の弾数アイコンの初期状態を確認（全アイコンが濃色）
-2. **Space キー** を押して弾を発射する
-   - 発射するたびにアイコンが右から薄色（`#CFC9C2`）に変わることを確認
-3. 弾を撃ち切る（全アイコンが薄色になる）
-   - `ReloadCircle`（円形プログレス）が表示されることを確認
-   - リロード完了とともに円が消え、アイコンが1つずつ濃色に戻ることを確認
-
-**確認チェック**
-- [ ] 発射でアイコンが薄くなる
-- [ ] 弾切れで ReloadCircle が出現する
-- [ ] リロード完了でアイコンが復活する
-- [ ] ReloadCircle がリロード進捗に合わせて塗りつぶされる
+> `ModuleReplaceUI.cs` の `panel` フィールドにはこの `Panel` を指定します（ルートの `ModuleReplacePanel` ではなく）。
 
 ---
 
-### 8-7. 全体の見た目の最終チェック
+## 2-4. ModuleReplaceUI の Inspector をアサイン
 
-プレイモードでゲームを操作しながら以下を確認します。
+`ModuleReplacePanel` の `ModuleReplaceUI` コンポーネントに以下をアサイン:
 
-- [ ] 背景・パネルすべてがクリーム〜グレージュの暖かいトーンに統一されている
-- [ ] 白すぎる部分、黒すぎる部分がない
-- [ ] 文字がすべて日本語フォントで表示されている（文字化け・豆腐文字がない）
-- [ ] 全体的にゲームを遊んでいて目に優しい雰囲気になっている
+| フィールド | アサインするもの |
+|---|---|
+| `Panel` | `Panel` オブジェクト（非表示にしたもの） |
+| `New Module Icon` | `NewModuleIcon` の Image コンポーネント |
+| `New Module Name` | `NewModuleName` の TextMeshProUGUI |
+| `Slot Option Buttons` (配列 × 7) | `SlotOptionButton` × 7 の ModuleOptionButton コンポーネント |
+| `Discard Button` | `DiscardButton` の Button コンポーネント |
 
 ---
 
-## 9. トラブルシューティング
+## 2-5. TankPresenter の Inspector に追加
 
-### スクリプトが Inspector に表示されない
-Console ウィンドウ（`Ctrl+Shift+C`）でコンパイルエラーを確認してください。  
-エラーがなければ Unity のコンパイルが終わるまで数秒待ってから再試行します。
+1. `TankPresenter` がアタッチされているオブジェクトを選択
+2. Inspector の `TankPresenter` コンポーネントを確認
+3. **`Module Replace UI`** フィールドに `ModuleReplacePanel` の **`ModuleReplaceUI` コンポーネント** をドラッグ
 
-### ThemeColor が Create メニューに出ない
-スクリプトがまだコンパイルされていない状態です。Console にエラーがなければ少し待ってから再試行してください。
+---
 
-### HP バーが表示されない・動かない
-- `GameHUD` の `Hp Fill` フィールドに `HPFill` オブジェクトの **Image コンポーネント** がアサインされているか確認
-- `HPFill` の `Image Type` が **Filled** / `Fill Method` が **Horizontal** になっているか確認
+## 2-6. シーンを保存
 
-### 弾数アイコンが出ない
-- `Ammo Bullet Prefab` フィールドに `AmmoBulletPrefab` の **Image コンポーネント** がアサインされているか確認（GameObjectごとではなくコンポーネント単位でドラッグ）
-- `AmmoBulletPrefab` が非表示（チェックOFF）になっているか確認
+`Ctrl + S` でシーンを保存します。
 
-### ReloadCircle が出ない・円にならない
-- `Image Type` が **Filled**、`Fill Method` が **Radial 360** になっているか確認
-- Sprite に**円形のスプライト**が設定されているか確認（四角のスプライトでは円に見えません）
+---
 
-### ドラッグ&ドロップが反応しない
-- Hierarchy に `EventSystem` が存在するか確認  
-  ない場合: `GameObject > UI > Event System` で追加
-- ドラッグ元・ドロップ先の GameObject に `Raycast Target` が ON になっているか確認
+## 2-7. 動作確認（プレイモード）
 
-### 属性カラー（AccentBar / AccentLine / ElementDot）が表示されない
-- 各スクリプトの Inspector で `Theme` フィールドに `ThemeColor.asset` がアサインされているか確認
-- モジュールの `moduleElement` が `None` に設定されている場合はグレー（`#B0ABA3`）で表示されます（正常な動作です）
+| 確認項目 | 期待する結果 |
+|---|---|
+| スロット7つが埋まった状態でカードを選択 | `ModuleReplaceUI` が表示される ✅ |
+| 「破棄する」ボタンを押す | パネルが閉じ、スロットに変化なし ✅ |
+| スロットボタンのいずれかを押す | そのスロットが新モジュールに入れ替わる ✅ |
+| 入れ替え後パネルが閉じる | 通常プレイに戻る ✅ |
+| Console にエラーが出ない | ✅ |
 
-### フォントが豆腐文字（□）になる
-- `Edit > Project Settings > TextMesh Pro` の `Default Font Asset` に日本語対応の Font Asset が設定されているか確認
-- Dynamic モードの Font Asset を使っている場合、エディタ上では初回表示時に一瞬豆腐になることがあります。プレイモードを再起動すると解消します。
+---
+
+## トラブルシューティング
+
+### Missing Script の警告が出る
+→ 削除したスクリプト（InventoryUI / InventoryItemUI）がまだどこかの GameObject にアタッチされています。  
+Hierarchy を検索（`Ctrl+F`）して該当オブジェクトを見つけ、`Remove Component` で削除してください。
+
+### スロットに自動装備されない
+→ `TankPresenter` の `Slot UI` フィールドに SlotUI がアサインされているか確認してください。
+
+### ModuleReplaceUI が表示されない（スロット満杯時）
+→ `TankPresenter` の `Module Replace UI` フィールドに ModuleReplaceUI がアサインされているか確認してください。  
+→ `Panel` の初期状態が非表示（チェック OFF）になっているか確認してください。
+
+### ボタンを押しても反応しない
+→ Hierarchy に `EventSystem` が存在するか確認してください。
