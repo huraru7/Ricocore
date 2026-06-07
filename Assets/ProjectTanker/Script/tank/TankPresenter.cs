@@ -9,44 +9,52 @@ public class TankPresenter : MonoBehaviour
 
     [Header("View")]
     [SerializeField] private GetModuleSelectUI getModuleSelectUI;
-    [SerializeField] private InventoryUI inventoryUI;
     [SerializeField] private SlotUI slotUI;
+    [SerializeField] private ModuleReplaceUI moduleReplaceUI;
+
+    private ModuleData _pendingModule;
 
     void Start()
     {
-        //:Model→View: 3択候補が生成されたらUIに表示
+        // Model→View: 3択候補が生成されたらUIに表示
         tankModuleManager.OnModuleCandidatesGenerated
             .Subscribe(candidates => getModuleSelectUI.ShowOptions(candidates))
             .AddTo(this);
 
-        //:View→Model: プレイヤーが選択したらインベントリへ追加
+        // View→Model: 選択されたモジュールを空きスロットへ自動装備、満杯なら入れ替えUIへ
         getModuleSelectUI.OnModuleSelected
-            .Subscribe(selected => tankModuleManager.AddToInventory(selected))
+            .Subscribe(selected =>
+            {
+                if (tankModuleManager.TryAutoEquip(selected))
+                {
+                    _pendingModule = null;
+                }
+                else
+                {
+                    _pendingModule = selected;
+                    moduleReplaceUI.Show(selected, tankModuleManager.Slots);
+                }
+            })
             .AddTo(this);
 
-        //:Model→View: インベントリが変化したら一覧を更新
-        tankModuleManager.OnInventoryChanged
-            .Subscribe(inventory => inventoryUI.UpdateDisplay(inventory))
+        // View→Model: 入れ替え/破棄の決定を受け取る
+        moduleReplaceUI.OnDecision
+            .Subscribe(slotIndex =>
+            {
+                if (slotIndex >= 0 && _pendingModule != null)
+                    tankModuleManager.SetModule(slotIndex, _pendingModule);
+                _pendingModule = null;
+            })
             .AddTo(this);
 
-        //:View→Model: ドラッグドロップでモジュールをスロットへ装備
-        slotUI.OnModuleDropped
-            .Subscribe(e => tankModuleManager.SetModule(e.slotIndex, e.module))
-            .AddTo(this);
-
-        //:View→Model: スロットからインベントリへドラッグドロップで取り外し
-        inventoryUI.OnModuleReturnedFromSlot
-            .Subscribe(slotIndex => tankModuleManager.RemoveFromSlot(slotIndex))
-            .AddTo(this);
-
-        //:初期表示（全スロット空状態）
+        // 初期表示
         slotUI.UpdateDisplay(tankModuleManager.Slots);
 
-        //:Model→View: スロットが変化したら一覧を更新
+        // Model→View: スロットが変化したら一覧を更新
         tankModuleManager.OnSlotsChanged
             .Subscribe(slots => slotUI.UpdateDisplay(slots))
             .AddTo(this);
 
-        tankModuleManager.ModuleEarn();//:デバッグ用
+        tankModuleManager.ModuleEarn(); // デバッグ用
     }
 }
