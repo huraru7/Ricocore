@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "Ricocore.slnx"
+    "dotnet.defaultSolution": "project Tanker.slnx"
 }
