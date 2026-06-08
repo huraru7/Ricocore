@@ -40,7 +40,8 @@ public class TankMovement : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        Debug.Log($"move: {move}, moveSpeed: {moveSpeed}, turnRate: {turnRate}");
+        rb.angularVelocity = 0f;
+
         if (move != Vector2.zero)
         {
             Quaternion rot = Quaternion.Euler(0f, 0f, -90f + Mathf.Atan2(move.y, move.x) * Mathf.Rad2Deg);
