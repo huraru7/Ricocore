@@ -12,6 +12,7 @@ public class TankMovement : MonoBehaviour
 
     // [Header("Tank")]
     // [SerializeField] private GameObject tankBarrel;
+    //これ使う？　↑
 
     [SerializeField] private TankStatus _tankStatus;
 
@@ -44,10 +45,22 @@ public class TankMovement : MonoBehaviour
 
         if (move != Vector2.zero)
         {
-            Quaternion rot = Quaternion.Euler(0f, 0f, -90f + Mathf.Atan2(move.y, move.x) * Mathf.Rad2Deg);
-            transform.rotation = Quaternion.Lerp(transform.rotation, rot, Time.deltaTime * turnRate);
+            float angle = Vector2.Angle(transform.up, move);
+            if (angle >= 135f)
+            {
+                // 後方135°以上の入力: 旋回せずにバック
+                rb.linearVelocity = -transform.up * moveSpeed;
+            }
+            else
+            {
+                Quaternion rot = Quaternion.Euler(0f, 0f, -90f + Mathf.Atan2(move.y, move.x) * Mathf.Rad2Deg);
+                transform.rotation = Quaternion.Lerp(transform.rotation, rot, Time.deltaTime * turnRate);
+                rb.linearVelocity = transform.up * moveSpeed;
+            }
         }
-
-        rb.linearVelocity = transform.up * moveSpeed * (move == Vector2.zero ? 0f : 1f);
+        else
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
     }
 }
