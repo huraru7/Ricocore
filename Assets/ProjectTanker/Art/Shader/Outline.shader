@@ -11,7 +11,7 @@ Shader "Custom/Outline"
         Tags
         {
             "RenderType"     = "Transparent"
-            "Queue"          = "Transparent"
+            "Queue"          = "Transparent-1"
             "RenderPipeline" = "UniversalPipeline"
         }
 
@@ -29,7 +29,6 @@ Shader "Custom/Outline"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _MainTex_ST;
                 float4 _OutlineColor;
             CBUFFER_END
 
@@ -54,7 +53,7 @@ Shader "Custom/Outline"
             {
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
-                OUT.uv          = TRANSFORM_TEX(IN.uv, _MainTex);
+                OUT.uv          = IN.uv;
                 OUT.color       = IN.color;
                 return OUT;
             }

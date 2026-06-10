@@ -95,7 +95,7 @@ public class GameHUD : MonoBehaviour
     private void ShakeHPBar()
     {
         if (_hpBarRoot == null) return;
-        LMotion.Shake.Create(Vector2.zero, new Vector2(3f, 0f), 0.3f)
+        LMotion.Shake.Create(_hpBarRoot.anchoredPosition, new Vector2(3f, 0f), 0.3f)
             .WithFrequency(8)
             .WithDampingRatio(1f)
             .BindToAnchoredPosition(_hpBarRoot)

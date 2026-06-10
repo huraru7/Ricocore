@@ -32,7 +32,6 @@ Shader "Custom/CelShading"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _MainTex_ST;
                 float4 _BaseColor;
                 float4 _ShadowColor;
                 float  _Steps;
@@ -60,7 +59,7 @@ Shader "Custom/CelShading"
             {
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
-                OUT.uv          = TRANSFORM_TEX(IN.uv, _MainTex);
+                OUT.uv          = IN.uv;
                 OUT.color       = IN.color;
                 return OUT;
             }

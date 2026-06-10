@@ -41,7 +41,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DotRadius: 0.07
+    - _DotRadius: 0.02
     - _DotSpacing: 1
     - _EnableExternalAlpha: 0
     - _PulseAmount: 0.06

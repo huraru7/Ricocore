@@ -34,6 +34,7 @@ public class Bullet : MonoBehaviour
         _lineRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         _lineRenderer.receiveShadows = false;
         _lineRenderer.positionCount = 0;
+        _lineRenderer.sortingOrder = 10;
 
         // 前端（現在位置）が太く後端（軌跡末尾）が細くなる幅カーブ
         _lineRenderer.widthCurve = new AnimationCurve(
@@ -54,7 +55,7 @@ public class Bullet : MonoBehaviour
                 new GradientAlphaKey(0f,   1f)
             });
         _lineRenderer.colorGradient = gradient;
-        _lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        _lineRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
     }
 
     /// <summary>弾を初期化し、指定した方向へ発射する。</summary>
