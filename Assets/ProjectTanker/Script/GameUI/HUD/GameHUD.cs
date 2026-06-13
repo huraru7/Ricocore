@@ -1,3 +1,4 @@
+using System.Collections;
 using LitMotion;
 using LitMotion.Extensions;
 using R3;
@@ -47,6 +48,15 @@ public class GameHUD : MonoBehaviour
 
         if (reloadCircle != null)
             reloadCircle.gameObject.SetActive(false);
+
+        // Start() の実行順序に依存しないよう 1 フレーム後に強制リフレッシュ
+        StartCoroutine(InitAmmoDisplay());
+    }
+
+    private IEnumerator InitAmmoDisplay()
+    {
+        yield return null;
+        BuildAmmoIcons(tankStatus.getMagazineCapacity.Value);
     }
 
     void Update()
@@ -66,7 +76,6 @@ public class GameHUD : MonoBehaviour
         float ratio = max > 0 ? (float)hp / max : 0f;
         hpFill.fillAmount = ratio;
 
-        // HP残量に応じて fire(赤) → wind(黄) でグラデーション
         if (theme != null)
             hpFill.color = Color.Lerp(theme.fire, theme.wind, ratio);
 
@@ -78,12 +87,11 @@ public class GameHUD : MonoBehaviour
     {
         if (ammoContainer == null || ammoBulletPrefab == null) return;
 
-        // テンプレート（ammoBulletPrefab）自身は破棄しない
         foreach (Transform child in ammoContainer)
             if (child != ammoBulletPrefab.transform)
                 Destroy(child.gameObject);
 
-        ammoBulletPrefab.gameObject.SetActive(false); // テンプレートは常に非表示
+        ammoBulletPrefab.gameObject.SetActive(false);
 
         _ammoIcons = new Image[capacity];
         for (int i = 0; i < capacity; i++)
@@ -111,7 +119,6 @@ public class GameHUD : MonoBehaviour
         if (_ammoIcons == null || theme == null) return;
         for (int i = 0; i < _ammoIcons.Length; i++)
         {
-            // 残弾のアイコンは濃色、消費済みは薄色
             _ammoIcons[i].color = i < rounds ? theme.textPrimary : theme.border;
         }
     }
