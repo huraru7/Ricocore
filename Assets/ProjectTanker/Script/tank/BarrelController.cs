@@ -20,6 +20,14 @@ public class BarrelController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, 0f, transform.eulerAngles.z + deltaDeg);
     }
 
+    // ワールド方向へ即時回転（遅延なし・マウス追従用）
+    public void RotateTo(Vector2 worldDir)
+    {
+        if (worldDir == Vector2.zero) return;
+        float target = Mathf.Atan2(worldDir.y, worldDir.x) * Mathf.Rad2Deg - 90f;
+        transform.rotation = Quaternion.Euler(0f, 0f, target);
+    }
+
     // 現在のバレルが向いている方向（ワールド空間）
     public Vector2 AimDirection => transform.up;
 

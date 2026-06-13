@@ -11,13 +11,19 @@ public class TankBulletManager : BulletManagerBase
     [Header("Barrel")]
     [SerializeField] private BarrelController _barrel;
 
+    [Header("予告線")]
+    [SerializeField] private LineRenderer _aimLine;
+    [SerializeField] private float        _aimLineLength = 8f;
+    [SerializeField] private int          _maxBounces    = 2;
+    private Material  _aimLineMat;
+    private Texture2D _dotTexture;
+
     [Header("Setting")]
     [SerializeField] private GameObject bullet;
     [SerializeField] private bool isShoot = true;
     [SerializeField] private SerializableReactiveProperty<int> totalRounds;
     public SerializableReactiveProperty<int> getTotalRounds => totalRounds;
 
-    // リロード進捗 0–1（弾が満タンのときは 0）
     public float ReloadProgress => _tankStatus != null && totalRounds.Value < _tankStatus.getMagazineCapacity.Value
         ? Mathf.Clamp01(currentTime / _tankStatus.getReloadTime.Value)
         : 0f;
@@ -35,6 +41,50 @@ public class TankBulletManager : BulletManagerBase
             obj.SetActive(false);
             _pool.Enqueue(obj.GetComponent<Bullet>());
         }
+        SetupAimLine();
+    }
+
+    private void SetupAimLine()
+    {
+        if (_aimLine == null) return;
+        _aimLine.useWorldSpace   = true;
+        _aimLine.positionCount   = 2;
+        _aimLine.widthMultiplier = 0.04f;
+        _aimLine.textureMode     = LineTextureMode.Tile;
+        _aimLine.sortingOrder    = 5;
+
+        var grad = new Gradient();
+        grad.SetKeys(
+            new GradientColorKey[] { new(new Color(0.2f, 0.9f, 0.3f), 0f), new(new Color(0.2f, 0.9f, 0.3f), 1f) },
+            new GradientAlphaKey[] { new(0.6f, 0f), new(0.6f, 1f) });
+        _aimLine.colorGradient = grad;
+
+        _dotTexture            = new Texture2D(16, 4, TextureFormat.RGBA32, false);
+        _dotTexture.wrapMode   = TextureWrapMode.Repeat;
+        _dotTexture.filterMode = FilterMode.Point;
+        for (int y = 0; y < 4; y++)
+            for (int x = 0; x < 16; x++)
+                _dotTexture.SetPixel(x, y, x < 8 ? Color.white : Color.clear);
+        _dotTexture.Apply();
+
+        _aimLineMat                  = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
+        _aimLineMat.mainTexture      = _dotTexture;
+        _aimLineMat.mainTextureScale = new Vector2(4f, 1f);
+
+        // アルファ透過を有効化（デフォルトは Opaque → 透明部が黒になる）
+        _aimLineMat.SetFloat("_Surface", 1f);
+        _aimLineMat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        _aimLineMat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        _aimLineMat.SetInt("_ZWrite", 0);
+        _aimLineMat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+
+        _aimLine.material            = _aimLineMat;
+    }
+
+    void OnDestroy()
+    {
+        if (_aimLineMat  != null) Destroy(_aimLineMat);
+        if (_dotTexture  != null) Destroy(_dotTexture);
     }
 
     void Start()
@@ -46,7 +96,6 @@ public class TankBulletManager : BulletManagerBase
     public override void TakeDamage(int damage)
     {
         _tankStatus.DealDamage(damage);
-        //do:ダメージ演出や効果音はここから呼び出せる。
     }
 
     private float currentTime = 0f;
@@ -55,9 +104,7 @@ public class TankBulletManager : BulletManagerBase
     {
         if (totalRounds.Value < _tankStatus.getMagazineCapacity.Value)
         {
-            //リロード処理
             currentTime += Time.deltaTime;
-
             if (currentTime > _tankStatus.getReloadTime.Value)
             {
                 totalRounds.Value++;
@@ -71,12 +118,43 @@ public class TankBulletManager : BulletManagerBase
             Fire();
             Debug.Log($"弾残量{totalRounds.Value}");
         }
+
+        UpdateAimLine();
     }
 
-    /// <summary>
-    /// 弾の召喚
-    /// </summary>
-    /// <param name="direction">発射方向</param>
+    private void UpdateAimLine()
+    {
+        if (_aimLine == null) return;
+
+        var     points    = new List<Vector3>();
+        Vector2 origin    = _barrel.MuzzlePosition;
+        Vector2 dir       = _barrel.AimDirection;
+        float   remaining = _aimLineLength;
+
+        points.Add(origin);
+
+        for (int bounce = 0; bounce <= _maxBounces; bounce++)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(origin, dir, remaining);
+
+            if (hit && hit.collider.TryGetComponent<Wall>(out _))
+            {
+                points.Add(hit.point);
+                remaining -= hit.distance;
+                dir    = Vector2.Reflect(dir, hit.normal);
+                origin = hit.point + hit.normal * 0.05f;
+            }
+            else
+            {
+                points.Add(origin + dir * remaining);
+                break;
+            }
+        }
+
+        _aimLine.positionCount = points.Count;
+        _aimLine.SetPositions(points.ToArray());
+    }
+
     public void SpawnBullet(Vector2 direction)
     {
         Bullet b;
@@ -102,9 +180,6 @@ public class TankBulletManager : BulletManagerBase
             SpawnBullet(_barrel.AimDirection);
     }
 
-    /// <summary>
-    /// 弾をプールに返却する
-    /// </summary>
     public override void ReturnBullet(Bullet b)
     {
         b.gameObject.SetActive(false);
