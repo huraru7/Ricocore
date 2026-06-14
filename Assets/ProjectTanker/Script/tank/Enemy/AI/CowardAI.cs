@@ -36,6 +36,8 @@ public class CowardAI : EnemyAIBase
     private float _effectiveDetectionRange;
     private bool _useBounceShots;
 
+    public override int GetDifficulty() => difficulty;
+
     public override void OnInitialize(EnemyManager manager)
     {
         int d = Mathf.Clamp(difficulty, 1, 5) - 1;

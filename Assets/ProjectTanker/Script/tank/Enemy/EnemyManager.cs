@@ -28,6 +28,7 @@ public class EnemyManager : MonoBehaviour
         _tankStatus.OnDead
             .Subscribe(_ =>
             {
+                ExperienceManager.Instance?.DropXp(transform.position, _ai);
                 _ai = null;
                 ExplosionEffect.SpawnAt(transform.position);
                 gameObject.SetActive(false);

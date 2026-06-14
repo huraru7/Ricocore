@@ -24,8 +24,13 @@ public class GameHUD : MonoBehaviour
     [SerializeField] private Image ammoBulletPrefab;       // 弾アイコンPrefab（Image）
     [SerializeField] private Image reloadCircle;           // リロード中の円形プログレス
 
+    [Header("経験値")]
+    [SerializeField] private Image           xpFill;
+    [SerializeField] private TextMeshProUGUI levelText;
+
     private Image[] _ammoIcons;
     private int _lastHP;
+    private MotionHandle _xpTween;
 
     void Start()
     {
@@ -48,6 +53,15 @@ public class GameHUD : MonoBehaviour
 
         if (reloadCircle != null)
             reloadCircle.gameObject.SetActive(false);
+
+        // 経験値変化を購読
+        if (ExperienceManager.Instance != null)
+        {
+            ExperienceManager.Instance.OnXpChanged
+                .Subscribe(_ => RefreshXp())
+                .AddTo(this);
+            RefreshXp();
+        }
 
         // Start() の実行順序に依存しないよう 1 フレーム後に強制リフレッシュ
         StartCoroutine(InitAmmoDisplay());
@@ -112,6 +126,28 @@ public class GameHUD : MonoBehaviour
             .WithDampingRatio(1f)
             .BindToAnchoredPosition(_hpBarRoot)
             .AddTo(this);
+    }
+
+    private void RefreshXp()
+    {
+        if (ExperienceManager.Instance == null) return;
+
+        int   level    = ExperienceManager.Instance.CurrentLevel;
+        int   xp       = ExperienceManager.Instance.CurrentXp;
+        int   required = ExperienceManager.Instance.RequiredXp;
+        float target   = required > 0 ? (float)xp / required : 0f;
+
+        if (xpFill != null)
+        {
+            if (_xpTween.IsActive()) _xpTween.Cancel();
+            _xpTween = LMotion.Create(xpFill.fillAmount, target, 0.4f)
+                .WithEase(Ease.OutCubic)
+                .Bind(v => xpFill.fillAmount = v)
+                .AddTo(this);
+        }
+
+        if (levelText != null)
+            levelText.text = $"Lv.{level}";
     }
 
     private void RefreshAmmo(int rounds)

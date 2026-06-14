@@ -37,6 +37,8 @@ public class SniperAI : EnemyAIBase
     private float _effectiveDetectionRange;
     private bool _useBounceShots;
 
+    public override int GetDifficulty() => difficulty;
+
     public override void OnInitialize(EnemyManager manager)
     {
         _aimTimer = 0f;

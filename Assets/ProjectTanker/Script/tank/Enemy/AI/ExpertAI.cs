@@ -43,6 +43,8 @@ public class ExpertAI : EnemyAIBase
     private float _effectiveDetectionRange;
     private bool _useBounceShots;
 
+    public override int GetDifficulty() => difficulty;
+
     public override void OnInitialize(EnemyManager manager)
     {
         if (manager.PlayerTransform != null)
